@@ -35,7 +35,6 @@ export class Sampler{
     public generateSampleData(){
         this.init();
         this.gatherData();
-        console.log(this);
         this.createSamplePoints(
             this._renderer.canvasSize[0], this._renderer.canvasSize[1]);
         this.colorQuantizeSamplePoints();

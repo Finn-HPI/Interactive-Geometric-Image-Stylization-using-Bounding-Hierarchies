@@ -52,7 +52,7 @@ export function componentToHex(c: number) {
 }
   
 export function colorToHex(color: paper.Color) {
-    return "#" + componentToHex(color.red) + componentToHex(color.green) + componentToHex(color.blue);
+    return "#" + componentToHex(color.red) + componentToHex(color.green) + componentToHex(color.blue) + componentToHex(color.alpha);
 }
 
 export function getColorFromHex(color: string){

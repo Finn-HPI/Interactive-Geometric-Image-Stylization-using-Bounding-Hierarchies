@@ -295,8 +295,8 @@ export class ImageRenderer extends Renderer {
 
     public getMaskData(){
         let ctx = ((document.getElementById('mask-canvas') as HTMLCanvasElement).getContext('2d') as CanvasRenderingContext2D);
-        // return ctx.getImageData(0, 0, this.canvasSize[0], this.canvasSize[1]).data;
-        return new Uint8ClampedArray(this._canvasSize[0] * this._canvasSize[1] * 4);
+        return ctx.getImageData(0, 0, this.canvasSize[0], this.canvasSize[1]).data;
+        // return new Uint8ClampedArray(this._canvasSize[0] * this._canvasSize[1] * 4);
     }
 
     public set layerMode(mode: number){

@@ -1,3 +1,4 @@
+import { Color } from "paper/dist/paper-core";
 import { Config } from "../config/config";
 import { BrushTool } from "../lod/brushTool";
 import { Controls } from "../utils/htmlUtil";
@@ -51,18 +52,35 @@ export class ImportanceMapControls {
         this._controls[1].createRow2Cols('brushRow1', 'col-4', 'col-8');
         this._controls[1].createRow2Cols('brushRow2', 'col-4', 'col-8');
 
-        const intensitySlider = this._controls[1].createSliderInput('Intensity', '', 0, '', 0, 1, 0.05, undefined, 'brushRow1-col2');
+        const intensitySlider = this._controls[1].createSliderInput('Intensity', '', 0, '', 0, 1, 0.0005, undefined, 'brushRow1-col2');
         intensitySlider.addEventListener('change', (event) => {
-
+            this._brush.intensity = (event.target as HTMLInputElement).valueAsNumber;
         });
 
         const brushSizeSlider = this._controls[1].createSliderInput('Brush Size', '', 1, '', 1, 100, 1, undefined, 'brushRow2-col2');
         brushSizeSlider.addEventListener('change', (event) => {
-
+            this._brush.strokeSize = (event.target as HTMLInputElement).valueAsNumber;
         });
 
         const positiveBrush = this._controls[1].createActionButton('\uf55d', 'btn-light', ['fas', 'fa-input', 'mt-2', 'light-border'], '', undefined, 'brushRow1-col1');
-        const negativeBrush = this._controls[1].createActionButton('\uf55d', 'btn-dark', ['fas', 'fa-input', 'mt-2'], '', undefined, 'brushRow2-col1');
+        positiveBrush.addEventListener('click', (event) => {
+            this._brush.color = new Color(1);
+        });
+
+        const negativeBrush = this._controls[1].createActionButton('\uf55d', 'btn-dark', ['fas', 'fa-input', 'mt-2'], '', undefined, 'brushRow1-col1');
+        negativeBrush.addEventListener('click', (event) => {
+            this._brush.color = new Color(0);
+        });
+
+        const clearButton = this._controls[1].createActionButton('\uf1f8', 'btn-primary', ['fas', 'fa-input', 'mt-2'], '', undefined, 'brushRow2-col1');
+        clearButton.addEventListener('click', (event) => {
+            this._brush.clear();
+        });
+
+        Config.registerList([
+            {name: 'intensity', element: intensitySlider},
+            {name: 'brushSize', element: brushSizeSlider}
+        ]);
     }
 
     private fillColumns(){
@@ -237,9 +255,7 @@ export class ImportanceMapControls {
             this.getCurrentValueItem('normal'),
             this.getCurrentValueItem('normalx'),
             this.getCurrentValueItem('normaly'),
-            this.getCurrentValueItem('normalz'),
-            this.getCurrentValueItem('intensity'),
-            this.getCurrentValueItem('brushSize'),
+            this.getCurrentValueItem('normalz')
         ]) || ignore;
         if(changed){
             this._settings.forEach((value: [number, number, HTMLInputElement, HTMLInputElement]) => {

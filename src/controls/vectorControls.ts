@@ -38,10 +38,8 @@ export class VectorControls {
     private build(){
         if(Config.layers.size == 0)
             return;
-
         this._svgBuilder.reset();
         Config.layers.forEach((item: [number, HTMLElement, HTMLButtonElement, HTMLButtonElement, HTMLButtonElement], key: Layer) => {
-            
             let tree = this.createTree(key.structure);
             tree.clipPath = key.clipPath;
             tree.buildFrom(
@@ -49,7 +47,6 @@ export class VectorControls {
                 this._renderer.canvasSize[0], this._renderer.canvasSize[1],
                 key.colorMode
             );
-            console.log(tree);
             this._svgBuilder.buildFrom(
                 tree,
                 this._renderer.canvasSize[0], this._renderer.canvasSize[1],

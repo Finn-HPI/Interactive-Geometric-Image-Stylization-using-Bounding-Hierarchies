@@ -43,20 +43,7 @@ export class Application {
         );
         importanceMapControls.renderer = this._renderer;
         importanceMapControls.setup();
-    
-        let seedingControls = new SeedingControls(
-            'sampling-container', 
-            'color-container',
-            'seed-container',
-            'seeding-apply-container',
-        );
-        seedingControls.renderer = this._renderer;
-        seedingControls.noiseViewer = this._noiseViewer;
-        seedingControls.setup();
-    
-        let geometryControls = new GeometryControls('gltf-container', 'geometry-export-container');
-        geometryControls.setup();
-    
+
         let layerControls = new LayerControls(
             'layer-container', 
             'layer-new-container',
@@ -66,6 +53,21 @@ export class Application {
         layerControls.layerViewer = this._layerViewer;
         layerControls.setup();
         Config.layerControls = layerControls;
+    
+        let seedingControls = new SeedingControls(
+            'sampling-container', 
+            'color-container',
+            'seed-container',
+            'seeding-apply-container',
+        );
+        seedingControls.renderer = this._renderer;
+        seedingControls.noiseViewer = this._noiseViewer;
+        seedingControls.layerControls = layerControls;
+        seedingControls.setup();
+    
+        let geometryControls = new GeometryControls('gltf-container', 'geometry-export-container');
+        geometryControls.setup();
+    
 
         let vectorControls = new VectorControls('svg-gen-container', 'colBook-container');
         vectorControls.renderer = this._renderer;

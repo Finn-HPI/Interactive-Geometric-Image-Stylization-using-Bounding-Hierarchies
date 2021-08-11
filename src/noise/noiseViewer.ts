@@ -11,7 +11,6 @@ export class NoiseViewer{
 
     public showSamplePoints(points: Array<{x: number, y: number}>, backColor = new Color(0,0,0), frontColor = new Color(1,1,1)){
         this._scope.setup('point-canvas');
-        console.log(this._scope.view.bounds);
         this.clear();
 
         const bounds = this._scope.view.bounds;

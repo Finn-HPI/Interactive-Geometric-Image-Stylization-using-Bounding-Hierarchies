@@ -159,11 +159,12 @@ export class Config {
 
     static removeAllLayers(){
         this._layers.forEach((item: [number, HTMLElement, HTMLButtonElement, HTMLButtonElement, HTMLButtonElement], key: Layer) => {
-            this.removeLayer(key);
+            this.removeLayer(key, false);
         });
+        this._layers.clear();
     }
 
-    static removeLayer(layer: Layer){
+    static removeLayer(layer: Layer, remove = true){
         let rLayer = this._layers.get(layer);
         if(!rLayer) return;
 
@@ -173,6 +174,7 @@ export class Config {
         rLayer[4].remove();
 
         let num = rLayer[0];
+        this._layers.delete(layer);
 
         this._layers.forEach((item: [number, HTMLElement, HTMLButtonElement, HTMLButtonElement, HTMLButtonElement]) => {
             if(item[0] > num)

@@ -4,6 +4,7 @@ import { NoiseViewer } from "../noise/noiseViewer";
 import { Controls } from "../utils/htmlUtil";
 import { ImageRenderer, Mode } from "../webgl/renderer";
 import { v4 as uuid } from 'uuid';
+import { LayerControls } from "./layerControls";
 
 export enum NoiseMode{
     BLUE_NOISE, SIMPLE
@@ -14,6 +15,7 @@ export class SeedingControls {
     protected _controls!: [Controls, Controls, Controls, Controls];
     protected _renderer!: ImageRenderer;
     protected _noiseViewer!: NoiseViewer;
+    protected _layerControls!: LayerControls;
 
     protected _seedField!: HTMLInputElement;
 
@@ -114,7 +116,6 @@ export class SeedingControls {
         this._points = this._noiseGenerator.allPoints();
 
         let noiseData = new Uint8Array(width * height * 4);
-        console.log(width, height);
         this._points.forEach((each: {x: number, y: number}) => {
             const i = ((height - Math.floor(each.y)) * width + Math.floor(each.x)) * 4;
             noiseData[i] = 1;
@@ -153,13 +154,12 @@ export class SeedingControls {
             ['seed', this._seed]
         ]) || ignore;
 
-        if(samplingChanged){
-            console.log('sample');
+        if(samplingChanged)
             this.updateSampling();
-        }
 
         if(samplingChanged || paletteChanged){
             Config.setApplyIgnore('seeding');
+            this._layerControls.refreshExistingLayers();
             Config.needsRefresh = true;
         }
     }
@@ -170,5 +170,9 @@ export class SeedingControls {
 
     public set renderer(renderer: ImageRenderer){
         this._renderer = renderer;
+    }
+
+    public set layerControls(controls: LayerControls){
+        this._layerControls = controls;
     }
 }

@@ -25,8 +25,8 @@ export function defaultValues(): ValueItem[]{
         {name: 'normaly', value: -0.35},
         {name: 'normalz', value: 0.3},
         //importance map local
-        {name: 'intensity', value: 1},
-        {name: 'brushSize', value: 1},
+        {name: 'intensity', value: 0.5},
+        {name: 'brushSize', value: 3},
         //sampling
         {name: 'samplingMode', value: 0},
         {name: 'minDist', value: 4},

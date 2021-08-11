@@ -1,10 +1,12 @@
+import { Color } from "paper/dist/paper-core";
+import { colorToHex } from "../utils/colorUtil";
 
 // https://dev.to/ascorbic/a-more-realistic-html-canvas-paint-tool-313b
 export class BrushTool {
 
     protected _intensity!: number;
     protected _strokeSize!: number;
-    protected _color!: string;
+    protected _color!: paper.Color;
 
     protected _canMove = false;
 
@@ -16,25 +18,37 @@ export class BrushTool {
 
     public constructor(id: string){
         this._intensity = 0;
-        this._strokeSize = 20;
+        this._strokeSize = 0;
         this._canvas = document.getElementById(id) as HTMLCanvasElement;
         this._context = this._canvas.getContext('2d') as CanvasRenderingContext2D;
-        
         this.init();
     }
 
     private init(){
-        this._color = '#3d34a5';
+        this._intensity = 0;
+        this._color = new Color(1,1,1,0);
     }
 
     public mouseButtonIsDown(buttons: number) {
         return ((0b01 & buttons) === 0b01);
     }
 
+    private convertPoint(point: [number, number]): [number, number]{
+        let xScale = this._context.canvas.width / this._context.canvas.clientWidth;
+        let yScale = this._context.canvas.height / this._context.canvas.clientHeight;
+
+        return [point[0] * xScale, point[1] * yScale];
+    }
+
     public continueStroke(point: [number, number]){
+        point = this.convertPoint(point);
         this._context.beginPath();
         this._context.moveTo(this._latestPoint[0], this._latestPoint[1]);
-        this._context.strokeStyle = this._color;
+
+        this._color.alpha = this._intensity;
+        this._context.strokeStyle = colorToHex(this._color);
+
+        console.log(this._intensity, this._strokeSize);
         this._context.lineWidth = this._strokeSize;
         this._context.lineCap = 'round';
         this._context.lineJoin = 'round';
@@ -45,6 +59,7 @@ export class BrushTool {
     }
 
     public startStroke(point: [number, number]){
+        point = this.convertPoint(point);
         this._drawing = true;
         this._latestPoint = point;
     }
@@ -52,7 +67,6 @@ export class BrushTool {
     public mouseMove(evt: any){
         if(!this._drawing || !this._canMove)
             return;
-        console.log(this._context.canvas.width, this._context.canvas.width, this._context.scale(evt.offsetX, evt.offsetY));
         this.continueStroke([evt.offsetX, evt.offsetY]);
     }
 
@@ -77,11 +91,11 @@ export class BrushTool {
         this._canMove = false;
     }
 
-    public get color(){
-        return this._color;
+    public clear(){
+        this._context.clearRect(0, 0, this._context.canvas.width, this._context.canvas.height);
     }
 
-    public set color(color: string){
+    public set color(color: paper.Color){
         this._color = color;
     }
 
@@ -91,6 +105,10 @@ export class BrushTool {
 
     public set strokeSize(size: number){
         this._strokeSize = size;
+    }
+
+    public set intensity(intensity: number){
+        this._intensity = intensity;
     }
 
     public get canMove(){

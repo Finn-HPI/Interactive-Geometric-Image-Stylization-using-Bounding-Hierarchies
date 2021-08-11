@@ -154,7 +154,6 @@ export class LayerControls {
         
         if(Config.needsRefresh){
             this._sampler.generateSampleData();
-            this.refreshExistingLayers();
             Config.needsRefresh = false;
         }
 
@@ -162,11 +161,12 @@ export class LayerControls {
         Config.addLayer(layer, row, showButton, clipButton, removeButton, addToConfig);
     }
 
-    private refreshExistingLayers(){
-        console.log('refresh existing layers');
+    public refreshExistingLayers(){
+        this._sampler.generateSampleData();
         Config.layers.forEach((item: [number, HTMLElement, HTMLButtonElement, HTMLButtonElement, HTMLButtonElement], key: Layer) => {
             key.points = this._sampler.samplePoints;
         });
+        Config.needsRefresh = false;
     }
 
     public set layerViewer(viewer: LayerViewer){
