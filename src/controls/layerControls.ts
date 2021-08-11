@@ -71,14 +71,14 @@ export class LayerControls {
         });
 
         const from = this._controls[1].createNumberInput(
-            'from', '', 0, '', 0, 1, 0.05
+            'from', '', 0, '', 0, 255, 255
         );
         from.addEventListener('change', (event) => {
             this._from = (event.target as HTMLInputElement).valueAsNumber;
         });
 
         const to = this._controls[1].createNumberInput(
-            'to', '', 0, '', 0, 1, 0.05
+            'to', '', 0, '', 0, 255, 1
         );
         to.addEventListener('change', (event) => {
             this._to = (event.target as HTMLInputElement).valueAsNumber;

@@ -1,5 +1,5 @@
 import { Layer } from "../building/layer/layer";
-import { defaultValues } from "./default";
+import { defaultApplyIgnore, defaultValues } from "./default";
 import { LayerControls } from "../controls/layerControls";
 import { colorModeToString, criteriaToString, dataStructureToString, stringToColorMode, stringToCriteria, stringToDataStructure } from "../utils/conversionUtil";
 
@@ -26,6 +26,8 @@ interface ConfigFormat{
 
 export class Config {
 
+    static _applyIgnore = defaultApplyIgnore();
+
     static _htmlElements = new Map<string, HTMLInputElement|HTMLSelectElement>();
     static _layerControls: LayerControls;
 
@@ -47,6 +49,8 @@ export class Config {
     }
 
     static applyConfig(){
+        this._applyIgnore = defaultApplyIgnore();
+
         this._config.input.forEach((item: ValueItem) => {
             let evt = document.createEvent("HTMLEvents");
             evt.initEvent("change", false, true);
@@ -58,6 +62,7 @@ export class Config {
             if(element)
                 element.dispatchEvent(evt);
         });
+
         this._nextLayerNum = 0;
         this._layers = new Map<Layer, [number, HTMLElement, HTMLButtonElement, HTMLButtonElement, HTMLButtonElement]>();
         this._config.layers.forEach((item: LayerItem) => {
@@ -224,6 +229,14 @@ export class Config {
 
     static set layerControls(controls: LayerControls){
         this._layerControls = controls;
+    }
+
+    static applyIgnore(name: string){
+        return this._applyIgnore.get(name);
+    }
+
+    static setApplyIgnore(name: string, value = false){
+        this._applyIgnore.set(name, value);
     }
 
 }

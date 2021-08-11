@@ -15,8 +15,13 @@ export class LayerViewer{
     public showLayer(layer: Layer){
         this._scope.setup('layer-canvas');
         this.clear();
+
+        const bounds = this._scope.view.bounds;
+        const xScale = bounds.width / this._canvasSize[0];
+        const yScale = bounds.height / this._canvasSize[1];
+
         layer.points.forEach((point: DataPoint) => {
-            let circ = new Path.Circle(new Point(point.x, point.y), 1);
+            let circ = new Path.Circle(new Point(point.x * xScale, point.y * yScale), 1);
             circ.fillColor = point.color;
         });
     }

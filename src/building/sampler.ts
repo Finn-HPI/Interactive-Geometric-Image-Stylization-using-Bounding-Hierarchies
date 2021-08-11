@@ -73,15 +73,15 @@ export class Sampler{
                     let mask_alpha = this._maskData[flippedIndex + 3] / 255;
                     let lod = this._lodData[index] * (1-mask_alpha) + this._maskData[flippedIndex] * mask_alpha;
 
-                    let depth = this._depthData[index] / 255;
-                    let matting = this._mattingData[index] / 255;
-                    let saliencyA = this._saliencyAData[index] / 255;
-                    let saliencyO = this._saliencyOData[index] / 255;
+                    let depth = this._depthData[index];
+                    let matting = this._mattingData[index];
+                    let saliencyA = this._saliencyAData[index];
+                    let saliencyO = this._saliencyOData[index];
 
                     let segmentation: [number, number, number] = [
-                        this._segmentationData[index] / 255, 
-                        this._segmentationData[index + 1] / 255, 
-                        this._segmentationData[index + 2] / 255
+                        this._segmentationData[index], 
+                        this._segmentationData[index + 1], 
+                        this._segmentationData[index + 2]
                     ];
                     let point = new DataPoint(
                         x, height - y, lod, 

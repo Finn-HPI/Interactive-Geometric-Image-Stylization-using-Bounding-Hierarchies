@@ -1,4 +1,5 @@
 import { Canvas } from "webgl-operate";
+import { SVGBuilder } from "./building/builder/svgBuilder";
 import { LayerViewer } from "./building/layer/layerViewer";
 import { Config } from "./config/config";
 import { GeneralControls } from "./controls/generalControls";
@@ -8,7 +9,6 @@ import { InputControls } from "./controls/inputControls";
 import { LayerControls } from "./controls/layerControls";
 import { SeedingControls } from "./controls/seedingControls";
 import { VectorControls } from "./controls/vectorControls";
-import { BrushTool } from "./lod/brushTool";
 import { NoiseViewer } from "./noise/noiseViewer";
 import { ImageRenderer } from "./webgl/renderer";
 
@@ -67,7 +67,8 @@ export class Application {
         layerControls.setup();
         Config.layerControls = layerControls;
 
-        let vectorControls = new VectorControls('vector-build-container');
+        let vectorControls = new VectorControls('svg-gen-container', 'colBook-container');
+        vectorControls.renderer = this._renderer;
         vectorControls.setup();
         
         Config.applyConfig();

@@ -227,6 +227,8 @@ export class ImportanceMapControls {
     }
 
     public apply(){
+        let ignore = Config.applyIgnore('importance');
+
         let changed = Config.updateValues([
             this.getCurrentValueItem('depth'),
             this.getCurrentValueItem('matting'),
@@ -238,11 +240,12 @@ export class ImportanceMapControls {
             this.getCurrentValueItem('normalz'),
             this.getCurrentValueItem('intensity'),
             this.getCurrentValueItem('brushSize'),
-        ]);
-
-        if(changed)
+        ]) || ignore;
+        if(changed){
             this._settings.forEach((value: [number, number, HTMLInputElement, HTMLInputElement]) => {
                 this._renderer.updateConfiguration(value[0], value[1]);
             });
+            Config.setApplyIgnore('importance');
+        }
     }
 }

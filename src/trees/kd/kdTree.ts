@@ -136,12 +136,4 @@ export class KdTree extends Tree{
     public get root(){
         return this._root;
     }
-
-    public get clipPath(){
-        return this._clipPath;
-    }
-
-    public set clipPath(path: paper.Path){
-        this._clipPath = path;
-    }
 }

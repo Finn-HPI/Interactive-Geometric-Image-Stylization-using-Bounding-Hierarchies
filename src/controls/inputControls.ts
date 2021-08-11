@@ -8,6 +8,7 @@ export class InputControls {
     protected _renderer!: ImageRenderer;
 
     protected _image!: string;
+    protected _imageSelection!: number;
     protected _layerMode!: number;
 
     protected _images: Map<string, string> = new Map<string, string>([
@@ -43,6 +44,7 @@ export class InputControls {
     public setup(){
 
         this._image = this._images.values().next().value;
+        this._imageSelection = 0;
         this._layerMode = this._layers.entries().next().value;
 
         const imageControl = this._controls[0].createSelectListInput(
@@ -50,6 +52,7 @@ export class InputControls {
         
         imageControl.addEventListener('change', (event) => {
             this._image = this._images.get((event.target as HTMLInputElement).value) as string;
+            this._imageSelection = imageControl.selectedIndex;
         });
 
         const layer = this._controls[0].createSelectListInput(
@@ -75,11 +78,15 @@ export class InputControls {
     }
 
     public apply(){
-        let imageChanged = Config.updateValue('image', this._image);
-        if(imageChanged)
+        let ignore = Config.applyIgnore('input');
+
+        let imageChanged = Config.updateValue('image', this._imageSelection) || ignore;
+        if(imageChanged){
             this._renderer.loadImages(this._image);
+            Config.setApplyIgnore('input');
+        }
         
-        let layerChanged = Config.updateValue('layer', this._layerMode);
+        let layerChanged = Config.updateValue('layer', this._layerMode) || ignore;
         if(layerChanged){
             this._renderer.layerMode = this._layerMode;
             this._renderer.mode = Mode.NORMAL;

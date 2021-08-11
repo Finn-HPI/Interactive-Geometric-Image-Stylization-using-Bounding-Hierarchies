@@ -28,17 +28,21 @@ function render(hashKey) {
     let pointCanvas = document.getElementById('point-canvas');
     let layerCanvas = document.getElementById('layer-canvas');
     let maskCanvas = document.getElementById('mask-canvas');
+    let svgCanvas = document.getElementById('svg-canvas');
 
     pointCanvas.style.display = 'none';
     layerCanvas.style.display = 'none';
     maskCanvas.style.display = 'none';
+    svgCanvas.style.display = 'none';
 
     switch(hashKey){
         case '':
+            svgCanvas.style.display = 'block';
             pages[0].style.display = 'block';
             tabs[0].style.backgroundColor = selected;
             break;
         case '#vector':
+            svgCanvas.style.display = 'block';
             pages[0].style.display = 'block';
             tabs[0].style.backgroundColor = selected;
             break;

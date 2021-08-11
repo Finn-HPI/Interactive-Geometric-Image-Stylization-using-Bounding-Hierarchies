@@ -8,11 +8,15 @@ export class Layer {
     protected _structure!: DataStructure;
     protected _criteria!: Criteria;
     protected _colorMode!: ColorMode;
+
+    protected _maxLod!: number;
     protected _maxLevel!: number;
     protected _minArea!: number;
 
     protected _from!: number;
     protected _to!: number;
+
+    protected _clipPath!: paper.PathItem | null;
 
     public constructor(
         structure: DataStructure,
@@ -35,8 +39,11 @@ export class Layer {
     private validataPoints(){
         let validPoints = new Array<DataPoint>();
         this._points.forEach((point: DataPoint) => {
-            if(this.isValidPoint(point))
+            if(this.isValidPoint(point)){
                 validPoints.push(point);
+                if(point.lod > this._maxLod)
+                    this._maxLod = point.lod;
+            }
         });
         this._points = validPoints;
     }
@@ -93,6 +100,18 @@ export class Layer {
 
     public get criteria(){
         return this._criteria;
+    }
+
+    public get clipPath(){
+        return this._clipPath;
+    }
+
+    public set clipPath(path: paper.PathItem | null){
+        this._clipPath = path;
+    }
+
+    public get maxLod(){
+        return this._maxLod;
     }
 
     public toString(){

@@ -13,8 +13,6 @@ export class VPTree extends Tree{
     protected _width!: number;
     protected _height!: number;
 
-    protected _clipPath!: paper.Path;
-
     private buildTree(data: DataPoint[]){
         this._root = this.recursiveBuild(data);
     }
@@ -214,14 +212,6 @@ export class VPTree extends Tree{
 
     public get root(){
         return this._root;
-    }
-
-    public get clipPath(){
-        return this._clipPath;
-    }
-
-    public set clipPath(path: paper.Path){
-        this._clipPath = path;
     }
 
     public get width(){

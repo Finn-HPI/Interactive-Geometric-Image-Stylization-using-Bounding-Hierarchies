@@ -45,15 +45,12 @@ export class ImageRenderer extends Renderer {
     private dumpPixelData(): Uint8Array{
         const w = this.canvasSize[0];
         const h = this.canvasSize[1];
-        console.log('wh: ', w, h);
         const out = new Uint8Array(w * h * 4);
-        console.log(out.length);
         this._exportFBO.bind();
         this._gl.readPixels(
             0, 0, w, h, this._gl.RGBA, this._gl.UNSIGNED_BYTE, out
         );
         this._exportFBO.unbind();
-        console.log(out.length);
         return out;
     }
 
@@ -286,11 +283,9 @@ export class ImageRenderer extends Renderer {
                 this._mode = Mode.SAMPLE_EXPORT;
                 this.onFrame();
                 sampleData = this.dumpPixelData();
-                console.log('simple');
                 break;
             case NoiseMode.BLUE_NOISE:
                 sampleData = Config.noiseData;
-                console.log('blue');
                 break;
             default:
                 sampleData = new Uint8Array();

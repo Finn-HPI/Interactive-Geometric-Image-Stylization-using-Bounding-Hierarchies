@@ -1,4 +1,3 @@
-import { Color } from "paper";
 import { DataPoint } from "../dataPoint";
 import { QuadNode } from "./quadNode";
 import { Vec2 } from "../vec2";

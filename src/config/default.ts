@@ -1,5 +1,13 @@
 import { ValueItem } from "./config";
 
+export function defaultApplyIgnore(): Map<string, boolean>{
+    return new Map<string, boolean>([
+        ['input', true],
+        ['importance', true],
+        ['seeding', true]
+    ]);
+}
+
 export function defaultValues(): ValueItem[]{
     return [
         //3d

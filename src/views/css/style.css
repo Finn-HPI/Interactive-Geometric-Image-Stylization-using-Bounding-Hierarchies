@@ -21,6 +21,18 @@ body {
 	background-color: #48494a;
 }
 
+#svg-canvas {
+    z-index: 3;
+    position: absolute;
+    background-color: #48494a;
+    border: none;
+}
+
+svg {
+    position: absolute;
+    background-color: #48494a;
+}
+
 #point-canvas {
     position: absolute;
     z-index: 2;

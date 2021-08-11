@@ -12,7 +12,7 @@ export enum ColorMode {
 export abstract class Tree {
 
     protected _random!: () => number;
-    protected _clipPath!: paper.Path;
+    protected _clipPath!: paper.PathItem | null;
     protected _colorMode!: ColorMode;
 
     abstract buildFrom(points: Array<DataPoint>, width: number, height: number, colorMode: ColorMode): void;
@@ -58,10 +58,6 @@ export abstract class Tree {
         return this._random;
     }
 
-    public get clipPath(){
-        return this._clipPath;
-    }
-
     public get colorMode(){
         return this._colorMode;
     }
@@ -70,7 +66,11 @@ export abstract class Tree {
         this._colorMode = mode;
     }
 
-    public set clipPath(path: paper.Path){
+    public get clipPath(){
+        return this._clipPath;
+    }
+
+    public set clipPath(path: paper.PathItem | null){
         this._clipPath = path;
     }
 }

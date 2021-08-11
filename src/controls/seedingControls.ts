@@ -6,8 +6,7 @@ import { ImageRenderer, Mode } from "../webgl/renderer";
 import { v4 as uuid } from 'uuid';
 
 export enum NoiseMode{
-    SIMPLE,
-    BLUE_NOISE
+    BLUE_NOISE, SIMPLE
 }
 
 export class SeedingControls {
@@ -130,6 +129,7 @@ export class SeedingControls {
         switch(this._samplingMode){
             case NoiseMode.SIMPLE:
                 (document.getElementById('point-canvas') as HTMLCanvasElement).style.display = 'none';
+                this._noiseViewer.clear();
                 this._renderer.mode = Mode.SAMPLE;
                 this._renderer.updateChange();
                 break;
@@ -142,17 +142,25 @@ export class SeedingControls {
     }
 
     public apply(){
-        Config.updateValue('maxColorCount', this._maxColorCount);
+        let ignore = Config.applyIgnore('seeding');
+
+        let paletteChanged = Config.updateValue('maxColorCount', this._maxColorCount) || ignore;
         let samplingChanged = Config.updateValues([
             ['samplingMode', this._samplingMode],
             ['minDist', this._minDist],
             ['maxTries', this._maxTries],
             ['probability', this._probability],
             ['seed', this._seed]
-        ]);
+        ]) || ignore;
+
         if(samplingChanged){
             console.log('sample');
             this.updateSampling();
+        }
+
+        if(samplingChanged || paletteChanged){
+            Config.setApplyIgnore('seeding');
+            Config.needsRefresh = true;
         }
     }
 
