@@ -1,0 +1,19 @@
+doctype html
+html
+    head
+        title IGIS-Demo
+        link(rel='stylesheet' href='https://getbootstrap.com/docs/4.4/dist/css/bootstrap.min.css')
+        link(rel='stylesheet' href='css/style.css')
+        ling(rel='stylesheet' href='')
+        script(src='https://kit.fontawesome.com/62b65c1d11.js' crossorigin='anonymous')
+        script(src='bundle.js')
+
+    body.bg-light
+        include parts/header.pug
+        include parts/progress.pug
+        include parts/mixins/container.pug
+        include parts/mixins/containerWithTitle.pug
+        main#main 
+            block content
+        
+

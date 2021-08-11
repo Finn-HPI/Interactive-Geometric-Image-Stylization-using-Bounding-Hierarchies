@@ -1,0 +1,18 @@
+extends layout.pug 
+
+block content
+    .container-fluid
+        include parts/tabs.pug
+        .row.mx-3
+            include parts/viewpanel.pug
+            include parts/pages/vector.pug
+            include parts/pages/3d.pug
+            include parts/pages/input.pug
+            include parts/pages/importance_map.pug
+            include parts/pages/layer.pug
+            include parts/pages/seeding.pug
+    include parts/exportModal.pug
+    script 
+        include js/main.js
+    script.
+        document.addEventListener("DOMContentLoaded", onDOMLoaded);

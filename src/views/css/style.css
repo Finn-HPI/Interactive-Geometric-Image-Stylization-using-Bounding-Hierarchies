@@ -1,0 +1,159 @@
+/* Hide scrollbar for Chrome, Safari and Opera */
+body::-webkit-scrollbar {
+    display: none;
+}
+  
+  /* Hide scrollbar for IE, Edge and Firefox */
+body {
+    font-family: 'Source Sans Pro', sans-serif !important;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+.progress {
+    border-radius: 0;
+}
+
+#webgl-canvas {
+    position: absolute;
+    z-index: 1;
+	border: none;
+	background-color: #48494a;
+}
+
+#point-canvas {
+    position: absolute;
+    z-index: 2;
+	border: none;
+}
+
+#layer-canvas {
+    position: absolute;
+    z-index: 2;
+    background-color: #48494a;
+	border: none;
+}
+
+#mask-canvas {
+    position: absolute;
+    z-index: 3;
+}
+
+.light-border {
+    border-width: 1px;
+    border-color: #ced4da;
+}
+
+.tab {
+    border-radius: 0;
+}
+
+.tab:hover {
+    background-color: #48494a!important;
+}
+
+a {
+    color: white;
+    text-decoration: none; 
+}
+a:hover {
+    color: white;
+    text-decoration: none; 
+}
+
+a:visited {
+    color: white;
+    text-decoration: none; 
+}
+
+#view-container {
+    background-color:#23272b;
+}
+
+#title {
+    background-color: #343a40;
+    color: white;
+    border-radius: 5px 5px 0px 0px;
+}
+
+.container-body {
+    background-color: white;
+    border-radius: 0px 5px 5px 5px;
+    border-style: solid;
+    border-color: #343a40;
+    border-width: 1px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.container-body::-webkit-scrollbar {
+    display: none;
+}
+
+.no-outline {
+    border-width: 0;
+}
+
+.round {
+    border-radius: 5px;
+}
+
+.tl-rounded {
+    border-radius: 5px 0px 0px 0px;
+}
+
+.tr-rounded {
+    border-radius: 0px 5px 0px 0px;
+}
+
+.tlbl-rounded {
+    border-radius: 5px 0px 0px 5px;
+}
+
+.trbr-rounded {
+    border-radius: 0px 5px 5px 0px;
+}
+
+.trblr-rounded {
+    border-radius: 0px 5px 5px 5px;
+}
+
+.trbr {
+    border-radius: 0px 5px 5px 0px;
+}
+
+.not-round {
+    border-radius: 0px;
+}
+
+.tlbl {
+    border-radius: 5px 0px 0px 5px;
+}
+
+.modal-header {
+    padding: 2px 16px;
+    background-color: #5cb85c;
+    color: white;
+  }
+  
+.modal-body {
+    padding: 2px 16px;
+}
+
+.modal-content {
+    position: relative;
+    background-color: #fefefe;
+    border: 1px solid #888;
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+    animation-name: animatetop;
+    animation-duration: 0.4s
+  }
+  
+  
+@keyframes animatetop {
+    from {top: -300px; opacity: 0}
+    to {top: 0; opacity: 1}
+}
+
