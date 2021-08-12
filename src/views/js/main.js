@@ -64,7 +64,7 @@ function render(hashKey) {
             pages[4].style.display = 'block';
             tabs[4].style.backgroundColor = selected;
             break;
-        case '#seeding':
+        case '#sampling':
             pointCanvas.style.display = 'block';
             pages[5].style.display = 'block';
             tabs[5].style.backgroundColor = selected;

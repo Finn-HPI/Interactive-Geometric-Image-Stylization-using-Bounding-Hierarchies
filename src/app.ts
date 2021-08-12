@@ -51,6 +51,7 @@ export class Application {
             this._renderer
         );
         layerControls.layerViewer = this._layerViewer;
+        layerControls.renderer = this._renderer;
         layerControls.setup();
         Config.layerControls = layerControls;
     
@@ -68,10 +69,15 @@ export class Application {
         let geometryControls = new GeometryControls('gltf-container', 'geometry-export-container');
         geometryControls.setup();
     
-
         let vectorControls = new VectorControls('svg-gen-container', 'colBook-container');
         vectorControls.renderer = this._renderer;
         vectorControls.setup();
+
+        inputControls.layerControls = layerControls;
+        
+        layerControls.inputControls = inputControls;
+        layerControls.importanceControls = importanceMapControls;
+        layerControls.seedingControls = seedingControls;
         
         Config.applyConfig();
     }    
@@ -90,7 +96,7 @@ export class Application {
                 break;
             case '#layer':
                 break;
-            case '#seeding':
+            case '#sampling':
                 break;
             default:
         }

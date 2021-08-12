@@ -13,7 +13,7 @@ export class ImportanceMapControls {
     protected _settings!: Map<string, [number, number, HTMLInputElement, HTMLInputElement]>;
 
     public constructor(id: string, id2: string, id3: string){
-        this._controls = [new Controls(id, 0.6, 'webgl-canvas'), new Controls(id2), new Controls(id3)];
+        this._controls = [new Controls(id, 0.5, 'webgl-canvas'), new Controls(id2), new Controls(id3)];
         this._settings = new Map<string, [number, number, HTMLInputElement, HTMLInputElement]>();
     }
 

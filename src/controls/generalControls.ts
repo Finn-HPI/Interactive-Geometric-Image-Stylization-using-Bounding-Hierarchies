@@ -18,7 +18,6 @@ export class GeneralControls {
         });
 
         this._importButton.addEventListener('click', (evt) => {
-            console.log('import');
             let input = document.createElement('input');
             input.type = 'file';
             input.addEventListener('change', (event) => {
@@ -28,7 +27,6 @@ export class GeneralControls {
                 const file = target.files[0];
                 if (!file || file.type !== 'application/json') 
                     return;
-                console.log(file.type);
                 const reader = new FileReader();
                 reader.onload = () => {
                     Config.importConfig(JSON.parse(reader.result as string));

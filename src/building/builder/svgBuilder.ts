@@ -125,8 +125,7 @@ export class SVGBuilder{
     }
 
     public generateSVG(){
-        // let svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + this._width + 'px" height="' + this._height + 'px">\n';
-        let svg = '<svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 ' + this._width + ' ' + this._height + '">';
+        let svg = '<svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 ' + this._width + ' ' + this._height + '">\n';
         let pathData = this.gatherCompletePathData();
         svg += pathData;
         svg += '</svg>';

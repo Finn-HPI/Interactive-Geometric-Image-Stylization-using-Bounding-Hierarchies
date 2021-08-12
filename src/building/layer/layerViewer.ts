@@ -15,7 +15,6 @@ export class LayerViewer{
     public showLayer(layer: Layer){
         this._scope.setup('layer-canvas');
         this.clear();
-
         const bounds = this._scope.view.bounds;
         const xScale = bounds.width / this._canvasSize[0];
         const yScale = bounds.height / this._canvasSize[1];

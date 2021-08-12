@@ -1,11 +1,13 @@
 import { Config } from "../config/config";
 import { Controls } from "../utils/htmlUtil";
 import { ImageRenderer, Mode } from "../webgl/renderer";
+import { LayerControls } from "./layerControls";
 
 export class InputControls {
 
     protected _controls!: [Controls, Controls];
     protected _renderer!: ImageRenderer;
+    protected _layerControls!: LayerControls;
 
     protected _image!: string;
     protected _imageSelection!: number;
@@ -81,16 +83,34 @@ export class InputControls {
         let ignore = Config.applyIgnore('input');
 
         let imageChanged = Config.updateValue('image', this._imageSelection) || ignore;
-        if(imageChanged){
-            this._renderer.loadImages(this._image);
-            Config.setApplyIgnore('input');
-        }
-        
         let layerChanged = Config.updateValue('layer', this._layerMode) || ignore;
-        if(layerChanged){
-            this._renderer.layerMode = this._layerMode;
-            this._renderer.mode = Mode.NORMAL;
-            this._renderer.updateChange();
-        }
+        Config.setApplyIgnore('input');
+        let promise = new Promise((resolve, reject) => {
+            if(imageChanged){
+                this._renderer.loadImages(this._image)
+                .then((res) => {
+                    if(layerChanged){
+                        this._renderer.layerMode = this._layerMode;
+                        this._renderer.mode = Mode.NORMAL;
+                        this._renderer.updateChange();
+                    }
+                    this._layerControls.refreshExistingLayers();
+                    resolve('loaded');
+                });
+            }else{
+                if(layerChanged){
+                    this._renderer.layerMode = this._layerMode;
+                    this._renderer.mode = Mode.NORMAL;
+                    this._renderer.updateChange();
+                }
+                resolve('loaded 2');
+            }
+        });
+
+        return promise;
+    }
+
+    public set layerControls(controls: LayerControls){
+        this._layerControls = controls;
     }
 }

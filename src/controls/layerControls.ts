@@ -5,6 +5,9 @@ import { Config } from "../config/config";
 import { Layer } from "../building/layer/layer";
 import { Sampler } from "../building/sampler";
 import { LayerViewer } from "../building/layer/layerViewer";
+import { InputControls } from "./inputControls";
+import { ImportanceMapControls } from "./importanceMapControls";
+import { SeedingControls } from "./seedingControls";
 
 export enum DataStructure {
     VP, QUAD, KD
@@ -23,6 +26,11 @@ export class LayerControls {
     protected _controls!: [Controls, Controls, Controls];
     protected _layerViewer!: LayerViewer;
     protected _sampler!: Sampler;
+    protected _renderer!: ImageRenderer;
+
+    protected _inputControls!: InputControls;
+    protected _importanceControls!: ImportanceMapControls;
+    protected _seedingControls!: SeedingControls;
 
     protected _criterias: Map<string, Criteria> = new Map<string, Criteria>([
         ['Lod', Criteria.LOD],
@@ -130,17 +138,33 @@ export class LayerControls {
             ['minArea', this._minArea],
         ]);
         let layer = new Layer(this._tree, this._criteria, this._from, this._to, this._maxLevel, this._minArea, this._color);
-        this.createLayer(layer);
+        this.createLayer(layer, true, Config.layers.size == 0);
     }
 
-    public createLayer(layer: Layer, addToConfig = true){
+    public applySettings(delay = false){
+        return new Promise((resolve, reject) => {
+            this._inputControls.apply().then((res) => {
+                    setTimeout(() => {
+                        this._importanceControls.apply();
+                        this._seedingControls.apply().then((res2) => {
+                            Config.setApplyIgnore('seeding', true);
+                            Config.setApplyIgnore('importance', true);
+                            this._sampler.generateSampleData().then((res) => {
+                                resolve('applied');
+                            });
+                        });
+                    }, 2000);
+            });
+        });
+    }
 
+    public finalizeLayer(layer: Layer, addToConfig = true){
         const id = uuid();
         const row = this._controls[0].createRow3Cols(id, 'col-8', 'col-2', 'col-2', 'pr-0', 'pr-0 pl-0', 'pl-0');
         const showButton = this._controls[0].createActionButton(layer.toString(), 'btn-secondary', ['mb-1', 'tlbl'], undefined, undefined, id + '-col1');
         const clipButton = this._controls[0].createActionButton('\uf5ee', 'btn-info', ['mb-1', 'fas', 'fa-input', 'not-round'], undefined, undefined, id + '-col2');
         const removeButton = this._controls[0].createActionButton('\uf1f8', 'btn-danger', ['mb-1', 'fas', 'fa-input', 'trbr'], '', undefined, id + '-col3');
-   
+
         showButton.addEventListener('click', () => {
             this._layerViewer.showLayer(layer);
         });
@@ -153,15 +177,30 @@ export class LayerControls {
         });
         
         if(Config.needsRefresh){
-            this._sampler.generateSampleData();
-            Config.needsRefresh = false;
+            this._sampler.generateSampleData().then((res) => {
+                Config.needsRefresh = false;
+                layer.points = this._sampler.samplePoints;
+                Config.addLayer(layer, row, showButton, clipButton, removeButton, addToConfig);
+            });
+        }else{
+            layer.points = this._sampler.samplePoints;
+            Config.addLayer(layer, row, showButton, clipButton, removeButton, addToConfig);
         }
+    }
 
-        layer.points = this._sampler.samplePoints;
-        Config.addLayer(layer, row, showButton, clipButton, removeButton, addToConfig);
+    public createLayer(layer: Layer, addToConfig = true, apply = true){
+        if(apply)
+            this.applySettings(false)
+            .then((res) => {
+                this.finalizeLayer(layer, addToConfig)
+            });
+        else
+            this.finalizeLayer(layer, addToConfig);
     }
 
     public refreshExistingLayers(){
+        if(Config.layers.size == 0) return;
+        
         this._sampler.generateSampleData();
         Config.layers.forEach((item: [number, HTMLElement, HTMLButtonElement, HTMLButtonElement, HTMLButtonElement], key: Layer) => {
             key.points = this._sampler.samplePoints;
@@ -171,5 +210,21 @@ export class LayerControls {
 
     public set layerViewer(viewer: LayerViewer){
         this._layerViewer = viewer;
+    }
+
+    public set inputControls(controls: InputControls){
+        this._inputControls = controls;
+    }
+
+    public set importanceControls(controls: ImportanceMapControls){
+        this._importanceControls = controls;
+    }
+
+    public set seedingControls(controls: SeedingControls){
+        this._seedingControls = controls;
+    }
+
+    public set renderer(renderer: ImageRenderer){
+        this._renderer = renderer;
     }
 }

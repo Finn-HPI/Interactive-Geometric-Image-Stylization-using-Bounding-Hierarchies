@@ -47,6 +47,7 @@ export class VectorControls {
                 this._renderer.canvasSize[0], this._renderer.canvasSize[1],
                 key.colorMode
             );
+            console.log(tree);
             this._svgBuilder.buildFrom(
                 tree,
                 this._renderer.canvasSize[0], this._renderer.canvasSize[1],

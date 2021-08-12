@@ -54,11 +54,15 @@ export class ImageRenderer extends Renderer {
         return out;
     }
 
-    private loadTexture(path: string, type: TextureType): void {
-        Jimp.read(path).then((img) => {
-            this._rawImage = img;
-            this._rawImage.flip(false, true);
-            this.resizeTexture(type);
+    private loadTexture(path: string, type: TextureType) {
+        return new Promise((resolve, reject) => {
+            Jimp.read(path).then((img) => {
+                this._rawImage = img;
+                this._rawImage.flip(false, true);
+                this.resizeTexture(type);
+                console.log(path);
+                resolve(type);
+            });
         });
     }
    
@@ -85,31 +89,40 @@ export class ImageRenderer extends Renderer {
     private imageLoaded(){
         this._loadedTextures++;
         setProgress(this._loadedTextures / this._textures.length);
-        if(this._loadedTextures >= this._textures.length)
-            this.finalizeImageLoading();
-    }
-
-    private finalizeImageLoading(){
-        this.updateChange();
-        if(!this._loaded){
-            this._loaded = true;
-        }
-        this._renderPass.layerMode = this._layerMode;
-        setProgress(0);
     }
 
     public loadImages(file: string){
-        
         this._loadedTextures = 0;
-        this.loadTexture('img/depth/new/' + file, TextureType.Depth);
-        this.loadTexture('img/input/' + file, TextureType.Input);
-        this.loadTexture('img/matting/modnetcamera/' + file, TextureType.Matting);
-        this.loadTexture('img/normal/' + file, TextureType.Normal);
-        this.loadTexture('img/saliency/attention/' + file, TextureType.SaliencyA);
-        this.loadTexture('img/saliency/objectness/' + file, TextureType.SaliencyO);
-        this.loadTexture('img/segmentation/deeplab1/' + file, TextureType.Segmentation);
+        this._loaded = false;
+        return new Promise((resolve, reject) => {
+            this.loadTexture('img/depth/new/' + file, TextureType.Depth).then((res) => {
+            this.loadTexture('img/input/' + file, TextureType.Input).then((res) => {
+            this.loadTexture('img/matting/modnetcamera/' + file, TextureType.Matting).then((res) => {
+            this.loadTexture('img/normal/' + file, TextureType.Normal).then((res) => {
+            this.loadTexture('img/saliency/attention/' + file, TextureType.SaliencyA).then((res) => {
+            this.loadTexture('img/saliency/objectness/' + file, TextureType.SaliencyO).then((res) => {
+            this.loadTexture('img/segmentation/deeplab1/' + file, TextureType.Segmentation).then((res) => {
 
-        this._mode = Mode.NORMAL;
+                this._mode = Mode.NORMAL;
+                this.updateChange();
+                this._renderPass.layerMode = this._layerMode;
+                setProgress(0);
+                this._loaded = true;
+                resolve('all loaded');
+
+            });
+            });
+            });
+            });
+            });
+            });
+            });
+        });
+        // this.loadTexture('img/matting/modnetcamera/' + file, TextureType.Matting);
+        // this.loadTexture('img/normal/' + file, TextureType.Normal);
+        // this.loadTexture('img/saliency/attention/' + file, TextureType.SaliencyA);
+        // this.loadTexture('img/saliency/objectness/' + file, TextureType.SaliencyO);
+        // this.loadTexture('img/segmentation/deeplab1/' + file, TextureType.Segmentation);
     }
 
     protected onInitialize(context: Context): boolean {
@@ -185,7 +198,6 @@ export class ImageRenderer extends Renderer {
     protected onFrame(): void {
         let fbo: Framebuffer;
         let pass: ExportPass | RenderPass;
-
         switch(this._mode){
             case Mode.NORMAL:
                 fbo = this._outputFBO;
@@ -295,8 +307,8 @@ export class ImageRenderer extends Renderer {
 
     public getMaskData(){
         let ctx = ((document.getElementById('mask-canvas') as HTMLCanvasElement).getContext('2d') as CanvasRenderingContext2D);
-        return ctx.getImageData(0, 0, this.canvasSize[0], this.canvasSize[1]).data;
-        // return new Uint8ClampedArray(this._canvasSize[0] * this._canvasSize[1] * 4);
+        // return ctx.getImageData(0, 0, this.canvasSize[0], this.canvasSize[1]).data;
+        return new Uint8ClampedArray(this._canvasSize[0] * this._canvasSize[1] * 4);
     }
 
     public set layerMode(mode: number){

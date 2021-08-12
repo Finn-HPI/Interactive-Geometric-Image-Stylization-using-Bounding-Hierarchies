@@ -127,41 +127,48 @@ export class SeedingControls {
     }
 
     public updateSampling(){
-        switch(this._samplingMode){
-            case NoiseMode.SIMPLE:
-                (document.getElementById('point-canvas') as HTMLCanvasElement).style.display = 'none';
-                this._noiseViewer.clear();
-                this._renderer.mode = Mode.SAMPLE;
-                this._renderer.updateChange();
-                break;
-            case NoiseMode.BLUE_NOISE:
-                (document.getElementById('point-canvas') as HTMLCanvasElement).style.display = 'block';
-                this.generateNoiseData();
-                this._noiseViewer.showSamplePoints(this._points);
-                break;
-        }
+        return new Promise((resolve, reject) => {
+            switch(this._samplingMode){
+                case NoiseMode.SIMPLE:
+                    (document.getElementById('point-canvas') as HTMLCanvasElement).style.display = 'none';
+                    this._noiseViewer.clear();
+                    this._renderer.mode = Mode.SAMPLE;
+                    this._renderer.updateChange();
+                    break;
+                case NoiseMode.BLUE_NOISE:
+                    (document.getElementById('point-canvas') as HTMLCanvasElement).style.display = 'block';
+                    this.generateNoiseData();
+                    this._noiseViewer.showSamplePoints(this._points);
+                    break;
+            }
+            resolve('generated');
+        });
     }
 
     public apply(){
         let ignore = Config.applyIgnore('seeding');
+        return new Promise((resolve, reject) => {
+            let paletteChanged = Config.updateValue('maxColorCount', this._maxColorCount) || ignore;
+            let samplingChanged = Config.updateValues([
+                ['samplingMode', this._samplingMode],
+                ['minDist', this._minDist],
+                ['maxTries', this._maxTries],
+                ['probability', this._probability],
+                ['seed', this._seed]
+            ]) || ignore;
 
-        let paletteChanged = Config.updateValue('maxColorCount', this._maxColorCount) || ignore;
-        let samplingChanged = Config.updateValues([
-            ['samplingMode', this._samplingMode],
-            ['minDist', this._minDist],
-            ['maxTries', this._maxTries],
-            ['probability', this._probability],
-            ['seed', this._seed]
-        ]) || ignore;
-
-        if(samplingChanged)
-            this.updateSampling();
-
-        if(samplingChanged || paletteChanged){
             Config.setApplyIgnore('seeding');
-            this._layerControls.refreshExistingLayers();
-            Config.needsRefresh = true;
-        }
+
+            if(samplingChanged)
+                this.updateSampling().then((res) => {resolve('finished')});
+
+            if(samplingChanged || paletteChanged){
+                this._layerControls.refreshExistingLayers();
+            }
+
+            if(!samplingChanged)
+                resolve('finished');
+        });
     }
 
     public set noiseViewer(viewer: NoiseViewer){

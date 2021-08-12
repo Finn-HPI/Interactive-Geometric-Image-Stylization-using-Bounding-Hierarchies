@@ -2,7 +2,7 @@ import { Color } from "paper/dist/paper-core";
 import { Config } from "../config/config";
 import { DataPoint } from "../trees/dataPoint";
 import { colorArrayToColor, colorToColorArray } from "../utils/colorUtil";
-import { ImageRenderer } from "../webgl/renderer";
+import { ImageRenderer, Mode } from "../webgl/renderer";
 
 export class Sampler{
 
@@ -33,33 +33,54 @@ export class Sampler{
     }
 
     public generateSampleData(){
-        this.init();
-        this.gatherData();
-        this.createSamplePoints(
-            this._renderer.canvasSize[0], this._renderer.canvasSize[1]);
-        this.colorQuantizeSamplePoints();
-        return this._samplePoints;
+        return new Promise((resolve, reject) => {
+            this.init();
+            
+                // this.gatherData().then((res) => {
+                //     this.createSamplePoints(
+                //         this._renderer.canvasSize[0], this._renderer.canvasSize[1]
+                //     ).then((res) => {
+                //         this.colorQuantizeSamplePoints().then((res) => {
+                //             resolve('sampled');
+                //         });
+                //     });
+                // });
+                this.gatherData();
+                this.createSamplePoints(
+                    this._renderer.canvasSize[0], this._renderer.canvasSize[1]);
+                this.colorQuantizeSamplePoints();
+                resolve('sampled');
+            
+        });
     }
 
     private gatherData(){
-        this._sampleData = this._renderer.getSampleData();
-        this._depthData = this._renderer.getDepthData();
-        this._mattingData = this._renderer.getMattingData();
-        this._saliencyAData = this._renderer.getSaliencyAData();
-        this._saliencyOData = this._renderer.getSaliencyOData();
-        this._segmentationData = this._renderer.getSegmentationData();
-        this._lodData = this._renderer.getLodData();
+        return new Promise((resolve, rejet) => {
+            this._sampleData = this._renderer.getSampleData();
+            this._depthData = this._renderer.getDepthData();
+            this._mattingData = this._renderer.getMattingData();
+            this._saliencyAData = this._renderer.getSaliencyAData();
+            this._saliencyOData = this._renderer.getSaliencyOData();
+            this._segmentationData = this._renderer.getSegmentationData();
+            this._lodData = this._renderer.getLodData();
 
-        this._rgbaData = this._renderer.getRGBAData();
-        this._maskData = this._renderer.getMaskData();
+            this._rgbaData = this._renderer.getRGBAData();
+            this._maskData = this._renderer.getMaskData();
+
+            this._renderer.mode = Mode.NORMAL;
+            this._renderer.layerMode = 0;
+            this._renderer.updateChange();
+            resolve('gather');
+        });
     }
 
     private isValidPoint(index: number){
-        return this._sampleData[index] + this._sampleData[index + 1] + this._sampleData[index + 2] == 3;
+        return this._sampleData[index] + this._sampleData[index + 1] + this._sampleData[index + 2] > 0;
     }
 
     private createSamplePoints(width: number, height: number){
-        let r, g, b = 0;
+        return new Promise((resolve, reject) => {
+            let r, g, b = 0;
         for(let x = 0; x < width; x++)
             for(let y = 0; y < height; y++){
                 const index = (y * width + x) * 4;
@@ -89,26 +110,30 @@ export class Sampler{
                     );
                     this._colorArray.push([r * 255, g * 255, b * 255]);
                     this._samplePoints.push(point);
-                    
                 }
             }
+            resolve('create points');
+        })
     }
 
     private colorQuantizeSamplePoints(){
-        let quantize = require('quantize');
+        return new Promise((resolve, reject) => {
+            let quantize = require('quantize');
 
-        const maxColorCount = Config.getValue('maxColorCount');
-        let colorMap = quantize(this._colorArray, maxColorCount);
-
-        if(colorMap !== false)
-            this._samplePoints.forEach((each: DataPoint) => {
-                each.quantizisedColor = colorArrayToColor(colorMap.map(colorToColorArray(each.color)));
-            });
-        else{
-            this._samplePoints.forEach((each: DataPoint) => {
-                each.quantizisedColor = each.color;
-            });
-        }
+            const maxColorCount = Config.getValue('maxColorCount');
+            let colorMap = quantize(this._colorArray, maxColorCount);
+    
+            if(colorMap !== false)
+                this._samplePoints.forEach((each: DataPoint) => {
+                    each.quantizisedColor = colorArrayToColor(colorMap.map(colorToColorArray(each.color)));
+                });
+            else{
+                this._samplePoints.forEach((each: DataPoint) => {
+                    each.quantizisedColor = each.color;
+                });
+            }
+            resolve('quantizise');
+        })
     }
 
     public get samplePoints(){

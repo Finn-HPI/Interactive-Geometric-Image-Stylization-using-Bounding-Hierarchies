@@ -63,20 +63,28 @@ export class Config {
                 element.dispatchEvent(evt);
         });
 
+        this._needsRefresh = true;
+
         this._nextLayerNum = 0;
         this._layers = new Map<Layer, [number, HTMLElement, HTMLButtonElement, HTMLButtonElement, HTMLButtonElement]>();
-        this._config.layers.forEach((item: LayerItem) => {
-            let layer = new Layer(
-                stringToDataStructure(item.tree),
-                stringToCriteria(item.criteria),
-                item.from,
-                item.to,
-                item.maxLevel,
-                item.minArea,
-                stringToColorMode(item.color)
-            );
-            this._layerControls.createLayer(layer, false);
-        })
+        
+        if(this._config.layers.length > 0){
+            this._layerControls.applySettings(true).then((res) => {
+                Config.needsRefresh = false;
+                this._config.layers.forEach((item: LayerItem) => {
+                    let layer = new Layer(
+                        stringToDataStructure(item.tree),
+                        stringToCriteria(item.criteria),
+                        item.from,
+                        item.to,
+                        item.maxLevel,
+                        item.minArea,
+                        stringToColorMode(item.color)
+                    );
+                    this._layerControls.createLayer(layer, false, false);
+                });
+            });
+        }
     }
 
     static register(name: string, element: HTMLInputElement|HTMLSelectElement){
@@ -142,7 +150,6 @@ export class Config {
 
     static addLayer(layer: Layer, row: HTMLElement, show: HTMLButtonElement, clip: HTMLButtonElement, remove: HTMLButtonElement, addToConfig = true){
         this._layers.set(layer, [this._nextLayerNum, row, show, clip, remove]);
-
         if(addToConfig)
             this._config.layers.push({
                 num: this._nextLayerNum,
