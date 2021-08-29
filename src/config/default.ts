@@ -50,5 +50,7 @@ export function defaultValues(): ValueItem[]{
         {name: 'border1', value: 0.3},
         {name: 'color0', value: '#000000'},
         {name: 'color1', value: '#000000'},
+        //global
+        {name: 'maxRecursionDepth', value: 10},
     ];
 }

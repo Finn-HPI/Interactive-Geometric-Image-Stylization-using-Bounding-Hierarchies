@@ -130,7 +130,9 @@ export class GlTFBuilder {
         const { pathDataToPolys } = require('svg-path-to-polygons');
         
         let poly = new Array<number>();
-        let points = pathDataToPolys(path, 10, {tolerance:1, decimals:1});
+        let maxRecursionDepth = Config.getValue('maxRecursionDepth');
+
+        let points = pathDataToPolys(path, maxRecursionDepth, {tolerance:1, decimals:1});
         points[0].forEach((item: [number, number]) => {
             let point = this.normalizePoint(item[0], item[1], this._width, this._height);
             poly.push(point[0], point[1]);
@@ -166,7 +168,7 @@ export class GlTFBuilder {
         });
 
         let polyIndices: Array<number> = earcut(poly);
-        for(let i = 0; i < polyIndices.length - 2; i++){
+        for(let i = 0; i < polyIndices.length - 2; i += 3){
             this._indices.push(polyIndices[i] + this._lastIndex);
             this._indices.push(polyIndices[i + 1] + this._lastIndex);
             this._indices.push(polyIndices[i + 2] + this._lastIndex);
@@ -463,10 +465,6 @@ export class GlTFBuilder {
     }
 
     private gatherMinAndMaxInfo(){
-
-        // console.log(this._minMaxInfo);
-        // console.log(this._indices.length, this._vertices.length);
-        // console.log(this._indices, this._vertices);
         this._minMaxInfo.minIndex = this._indices[0];
         this._minMaxInfo.maxIndex = this._indices[0];
 

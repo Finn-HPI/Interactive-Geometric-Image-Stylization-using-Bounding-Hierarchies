@@ -8,6 +8,8 @@ import { LayerViewer } from "../building/layer/layerViewer";
 import { InputControls } from "./inputControls";
 import { ImportanceMapControls } from "./importanceMapControls";
 import { SeedingControls } from "./seedingControls";
+import { ClipPathViewer } from "../building/layer/clipPathViewer";
+import { Point } from "paper/dist/paper-core";
 
 export enum DataStructure {
     VP, QUAD, KD
@@ -24,7 +26,6 @@ export enum Criteria {
 export class LayerControls {
 
     protected _controls!: [Controls, Controls, Controls];
-    protected _layerViewer!: LayerViewer;
     protected _sampler!: Sampler;
     protected _renderer!: ImageRenderer;
 
@@ -58,6 +59,9 @@ export class LayerControls {
     protected _maxLevel!: number;
     protected _minArea!: number;
 
+    protected _layerViewer!: LayerViewer;
+    protected _clipViewer!: ClipPathViewer;
+
     public constructor(id: string, id2: string, id3: string, renderer: ImageRenderer){
         const parentId = 'webgl-canvas';
         this._controls = [new Controls(id, 0.4, parentId), new Controls(id2, 0.4, parentId), new Controls(id3)];
@@ -65,6 +69,7 @@ export class LayerControls {
     }
 
     public setup(){
+        this.handleMouseAndKeyInput();
 
         const criteria = this._controls[1].createSelectListInput(
             'Criteria', Array.from(this._criterias.keys()));
@@ -127,6 +132,26 @@ export class LayerControls {
         ]);
     }
 
+    public handleMouseAndKeyInput(){
+        let clipCanvas = document.getElementById('clip-canvas') as HTMLCanvasElement;
+
+        clipCanvas.addEventListener('mouseup', (event: MouseEvent) => {
+            this._clipViewer.mouseUp(new Point(event.offsetX, event.offsetY));
+        });
+        
+        clipCanvas.addEventListener('mousedown', (event: MouseEvent) => {
+            this._clipViewer.mouseDown(new Point(event.offsetX, event.offsetY));
+        });
+
+        clipCanvas.addEventListener('mousemove', (event: MouseEvent) => {
+            this._clipViewer.mouseMove(new Point(event.offsetX, event.offsetY));
+        })
+
+        window.addEventListener('keydown', (event: KeyboardEvent) => {
+            this._clipViewer.handleKeys(event);
+        });
+    }
+
     public add(){
         Config.updateValues([
             ['criteria', this._criteria],
@@ -141,7 +166,7 @@ export class LayerControls {
         this.createLayer(layer, true, Config.layers.size == 0);
     }
 
-    public applySettings(delay = false){
+    public applySettings(){
         return new Promise((resolve, reject) => {
             this._inputControls.apply().then((res) => {
                     setTimeout(() => {
@@ -162,19 +187,27 @@ export class LayerControls {
         const id = uuid();
         const row = this._controls[0].createRow3Cols(id, 'col-8', 'col-2', 'col-2', 'pr-0', 'pr-0 pl-0', 'pl-0');
         const showButton = this._controls[0].createActionButton(layer.toString(), 'btn-secondary', ['mb-1', 'tlbl'], undefined, undefined, id + '-col1');
+
         const clipButton = this._controls[0].createActionButton('\uf5ee', 'btn-info', ['mb-1', 'fas', 'fa-input', 'not-round'], undefined, undefined, id + '-col2');
-        const removeButton = this._controls[0].createActionButton('\uf1f8', 'btn-danger', ['mb-1', 'fas', 'fa-input', 'trbr'], '', undefined, id + '-col3');
+        const removeButton = this._controls[0].createActionButton('\uf2ed', 'btn-danger', ['mb-1', 'fas', 'fa-input', 'trbr'], '', undefined, id + '-col3');
 
         showButton.addEventListener('click', () => {
             this._layerViewer.showLayer(layer);
         });
 
         clipButton.addEventListener('click', () => {
+            showButton.click();
+            this._clipViewer.activateLayer(layer);
         });
 
         removeButton.addEventListener('click', () => {
             Config.removeLayer(layer);
         });
+
+        const scaling = this._clipViewer.getScaling();
+        layer.scaleX = scaling[0];
+        layer.scaleY = scaling[1];
+
         
         if(Config.needsRefresh){
             this._sampler.generateSampleData().then((res) => {
@@ -190,7 +223,7 @@ export class LayerControls {
 
     public createLayer(layer: Layer, addToConfig = true, apply = true){
         if(apply)
-            this.applySettings(false)
+            this.applySettings()
             .then((res) => {
                 this.finalizeLayer(layer, addToConfig)
             });
@@ -210,6 +243,10 @@ export class LayerControls {
 
     public set layerViewer(viewer: LayerViewer){
         this._layerViewer = viewer;
+    }
+
+    public set clipPathViewer(viewer: ClipPathViewer){
+        this._clipViewer = viewer;
     }
 
     public set inputControls(controls: InputControls){

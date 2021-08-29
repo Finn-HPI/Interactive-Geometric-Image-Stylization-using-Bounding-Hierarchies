@@ -133,9 +133,7 @@ export class VectorControls {
             this._svgBuilder.buildFrom(
                 tree,
                 this._renderer.canvasSize[0], this._renderer.canvasSize[1],
-                key.maxLod,
-                key.maxLevel,
-                key.minArea
+                key
             );
             this._svgBuilder.treeToSvg();
 

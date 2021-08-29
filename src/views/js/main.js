@@ -27,12 +27,14 @@ function render(hashKey) {
 
     let pointCanvas = document.getElementById('point-canvas');
     let layerCanvas = document.getElementById('layer-canvas');
+    let clipCanvas = document.getElementById('clip-canvas');
     let maskCanvas = document.getElementById('mask-canvas');
     let svgCanvas = document.getElementById('svg-canvas');
     let gltfCanvas = document.getElementById('gltf-canvas');
 
     pointCanvas.style.display = 'none';
     layerCanvas.style.display = 'none';
+    clipCanvas.style.display = 'none';
     maskCanvas.style.display = 'none';
     svgCanvas.style.display = 'none';
     gltfCanvas.style.display = 'none';
@@ -64,6 +66,7 @@ function render(hashKey) {
             break;
         case '#layer':
             layerCanvas.style.display = 'block';
+            clipCanvas.style.display = 'block';
             pages[4].style.display = 'block';
             tabs[4].style.backgroundColor = selected;
             break;

@@ -1,3 +1,4 @@
+import { Path, Point } from "paper/dist/paper-core";
 import { ColorMode, Criteria, DataStructure } from "../../controls/layerControls";
 import { DataPoint } from "../../trees/dataPoint";
 import { criteriaToString, dataStructureToString } from "../../utils/conversionUtil";
@@ -9,6 +10,9 @@ export class Layer {
     protected _criteria!: Criteria;
     protected _colorMode!: ColorMode;
 
+    protected _scaleX!: number;
+    protected _scaleY!: number;
+
     protected _maxLod!: number;
     protected _maxLevel!: number;
     protected _minArea!: number;
@@ -16,7 +20,11 @@ export class Layer {
     protected _from!: number;
     protected _to!: number;
 
-    protected _clipPath!: paper.PathItem | null;
+    protected _clipPath!: paper.PathItem;
+    protected _pathAreas!: Array<paper.Path>;
+
+    protected _prevLayer!: Layer;
+    protected _nextLayer!: Layer;
 
     public constructor(
         structure: DataStructure,
@@ -34,6 +42,9 @@ export class Layer {
         this._maxLevel = maxLevel;
         this._minArea = minArea;
         this._colorMode = colorMode;
+        this._pathAreas = new Array<paper.Path>();
+
+        this._scaleX = 1, this._scaleY = 1;
     }
 
     private validataPoints(){
@@ -63,6 +74,21 @@ export class Layer {
             default:
                 return false;
         }
+    }
+
+    public generateClipPath(width: number, height: number, scaling = true): paper.PathItem{
+        const offset = 3
+        this._clipPath = new Path.Rectangle([-offset, -offset, width + offset, height + offset]);
+       
+        if(this._prevLayer)
+            this._clipPath = this._prevLayer.generateClipPath(width, height, scaling);
+
+        this._pathAreas.forEach((area: paper.Path) => {
+            this._clipPath = this._clipPath.subtract(area);
+        });
+        if(scaling)
+            this._clipPath.scale(this._scaleX, this._scaleY, new Point(0, 0));
+        return this._clipPath;
     }
 
     public get points(){
@@ -106,7 +132,7 @@ export class Layer {
         return this._clipPath;
     }
 
-    public set clipPath(path: paper.PathItem | null){
+    public set clipPath(path: paper.PathItem){
         this._clipPath = path;
     }
 
@@ -114,8 +140,49 @@ export class Layer {
         return this._maxLod;
     }
 
+    public get prevLayer(){
+        return this._prevLayer;
+    }
+
+    public set prevLayer(layer: Layer){
+        this._prevLayer = layer;
+    }
+
+    public get nextLayer(){
+        return this._nextLayer;
+    }
+
+    public set nextLayer(layer: Layer){
+        this._nextLayer = layer;
+    }
+
     public toString(){
         return criteriaToString(this._criteria) + ' [' + dataStructureToString(this._structure) + ': ' + this._from + ' - ' + this._to + ']'
     }
 
+    public addPathArea(area: paper.Path){
+        this._pathAreas.push(area);
+    }
+
+    public removePathArea(area: paper.Path){
+        const index = this._pathAreas.indexOf(area);
+        if (index > -1)
+            this._pathAreas.splice(index, 1);
+    }
+
+    public get pathAreas(){
+        return this._pathAreas;
+    }
+
+    public clearPathAreas(){
+        this._pathAreas = new Array<paper.Path>();
+    }
+
+    public set scaleX(scale: number){
+        this._scaleX = scale;
+    }
+
+    public set scaleY(scale: number){
+        this._scaleY = scale;
+    }
 }

@@ -9,21 +9,21 @@ import { VPNode } from "../../trees/vp/vpNode";
 import { VPTree } from "../../trees/vp/vpTree";
 import { colorToGrayScale, colorToHex, getColorFromHex } from "../../utils/colorUtil";
 import { colorLerp, lerp } from "../../utils/lerp";
+import { Layer } from "../layer/layer";
 export class SVGBuilder{
 
     protected _scope!: paper.PaperScope;
     protected _width!: number;
     protected _height!: number;
 
-    protected _maxLod!: number;
-    protected _maxLevel!: number;
-    protected _minArea!: number;
     protected _minUsedLevel!: number;
     protected _maxUsedLevel!: number;
 
     protected _background!: paper.PathItem;
 
     protected _tree!: VPTree | QuadTree | KdTree;
+    protected _layer!: Layer;
+
     protected _colorGroups!: Map<string, Array<string>>;
     protected _pattern!: string;
 
@@ -34,13 +34,13 @@ export class SVGBuilder{
         this._lastSvg = '<svg xmlns="http://www.w3.org/2000/svg"></svg>';
     }
 
-    public buildFrom(tree: any, width: number, height: number, maxLod: number = 255, maxLevel: number = 15, minArea = 5): void{
+    public buildFrom(tree: any, width: number, height: number, layer: Layer): void{
         this._scope = new PaperScope();
         this._scope.setup(new Size(width, height));
 
+        this._layer = layer;
+
         this._scope.activate();
-        this._maxLod = maxLod;
-        this._minArea = minArea;
         this._width = width;
         this._height = height;
 
@@ -51,7 +51,6 @@ export class SVGBuilder{
 
         this._maxUsedLevel = 0;
         this._minUsedLevel = -1;
-        this._maxLevel = maxLevel;
 
         if(this._tree.root == null) 
             return;
@@ -60,30 +59,38 @@ export class SVGBuilder{
     }
 
     public buildTree(){
-        if(this._tree.clipPath == undefined)
-            this._tree.clipPath = new Path.Rectangle(new Rectangle(new Point(0, 0), new Size(this._width, this._height)));
+        let clipPath = new Path.Rectangle(new Rectangle(new Point(0, 0), new Size(this._width, this._height)));
         
         let tree;
         switch(this._tree.constructor){
             case VPTree: tree = this._tree as VPTree;
-                tree.nodeToSVG(tree.root as VPNode, this._background, 0, this._tree.clipPath, this);
+                tree.nodeToSVG(tree.root as VPNode, this._background, 0, clipPath, this);
                 // tree.removeDetail();
                 break;
             case QuadTree: tree = this._tree as QuadTree;
-                tree.nodeToSVG(tree.root as QuadNode, 0, tree.clipPath as paper.PathItem, this);
+                tree.nodeToSVG(tree.root as QuadNode, 0, clipPath, this);
                 break;
             case KdTree: tree = this._tree as KdTree;
-                tree.nodeToSVG(tree.root as KdNode, new Rectangle(new Point(0,0), new Point(this._width, this._height)), 0, tree.clipPath as paper.PathItem, this);
+                tree.nodeToSVG(tree.root as KdNode, new Rectangle(new Point(0,0), new Point(this._width, this._height)), 0, clipPath, this);
         }
         console.log('finished build');
     }
 
+    private clipPath(path: paper.PathItem, clipPath: paper.PathItem): paper.PathItem{
+        return path.intersect(clipPath);
+    }
+
     public treeToSvg(){
-        if(this._tree.root == null) 
+        if(!this._tree || this._tree.root == null || !this._layer) 
             return;
+
+        const clipPath = this._layer.generateClipPath(this._width, this._height);
 
         this._tree.allTreeNodes(this._tree.root).forEach((each: any) => {
             if(each.path !== null){
+
+                each.path = this.clipPath(each.path, clipPath);
+
                 if(each.path.children && each.path.children.length > 0)
                     each.path.children.forEach((item: paper.Item) => {
                         item.fillColor = each.path.fillColor;
@@ -283,6 +290,8 @@ export class SVGBuilder{
         let items = new Map<paper.PointText, paper.PathItem>();
         let descriptions = new Array<paper.PointText>();
 
+        let maxRecursionDepth = Config.getValue('maxRecursionDepth');
+
 
         let index = 0;
         let pos = new Point(20, this._height + 20);
@@ -318,12 +327,13 @@ export class SVGBuilder{
                 if(pathRegex && idRegex){
                     let path = PathItem.create(pathRegex[1]);
                     
-                    let poly = pathDataToPolys(pathRegex[1], 10, {tolerance:1, decimals:1});
+                    let poly = pathDataToPolys(pathRegex[1], maxRecursionDepth, {tolerance:1, decimals:1});
 
                     if(path.area > 5){
-                        
-                        // let point = PathItem.create(pathRegex[1]).interiorPoint;
                         let point = new Point(this.centroid(poly[0]));
+                        if(!path.contains(point))
+                            point = path.interiorPoint;
+                        
                         let desc = new PointText(point);
                         desc.content = '' + index;
                         desc.justification = 'center';
@@ -365,11 +375,11 @@ export class SVGBuilder{
     }
 
     public get maxLevel(){
-        return this._maxLevel;
+        return this._layer.maxLevel;
     }
 
     public get minArea(){
-        return this._minArea;
+        return this._layer.minArea;
     }
 
     public get minUsedLevel(){

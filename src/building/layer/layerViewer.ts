@@ -2,7 +2,7 @@ import { Color, PaperScope, Path, Point} from "paper/dist/paper-core";
 import { DataPoint } from "../../trees/dataPoint";
 import { Layer } from "./layer";
 
-export class LayerViewer{
+export class LayerViewer {
 
     protected _scope!: paper.PaperScope;
     protected _canvasSize!: [number, number];

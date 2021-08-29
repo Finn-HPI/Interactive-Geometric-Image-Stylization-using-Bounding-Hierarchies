@@ -69,7 +69,7 @@ export class Config {
         this._layers = new Map<Layer, [number, HTMLElement, HTMLButtonElement, HTMLButtonElement, HTMLButtonElement]>();
         
         if(this._config.layers.length > 0){
-            this._layerControls.applySettings(true).then((res) => {
+            this._layerControls.applySettings().then((res) => {
                 Config.needsRefresh = false;
                 this._config.layers.forEach((item: LayerItem) => {
                     let layer = new Layer(
@@ -150,6 +150,14 @@ export class Config {
 
     static addLayer(layer: Layer, row: HTMLElement, show: HTMLButtonElement, clip: HTMLButtonElement, remove: HTMLButtonElement, addToConfig = true){
         this._layers.set(layer, [this._nextLayerNum, row, show, clip, remove]);
+
+        let prev = this.getLayerWithNum(this._nextLayerNum - 1);
+        console.log('prev', prev);
+        if(prev){
+            layer.prevLayer = prev;
+            prev.nextLayer = layer;
+        }
+
         if(addToConfig)
             this._config.layers.push({
                 num: this._nextLayerNum,
@@ -164,16 +172,30 @@ export class Config {
         this._nextLayerNum++;
     }
 
+    static getLayerWithNum(num: number): Layer | null {
+        let layer = null;
+        this._layers.forEach((value: [number, HTMLElement, HTMLButtonElement, HTMLButtonElement, HTMLButtonElement], key: Layer) => {
+            if(value[0] === num)
+                layer = key;
+        });
+        return layer;
+    }
+
     static removeAllLayers(){
         this._layers.forEach((item: [number, HTMLElement, HTMLButtonElement, HTMLButtonElement, HTMLButtonElement], key: Layer) => {
-            this.removeLayer(key, false);
+            this.removeLayer(key);
         });
         this._layers.clear();
     }
 
-    static removeLayer(layer: Layer, remove = true){
+    static removeLayer(layer: Layer){
         let rLayer = this._layers.get(layer);
         if(!rLayer) return;
+
+        if(layer.prevLayer)
+            layer.prevLayer.nextLayer = layer.nextLayer;
+        if(layer.nextLayer)
+            layer.nextLayer.prevLayer = layer.prevLayer;
 
         rLayer[1].remove();
         rLayer[2].remove();
