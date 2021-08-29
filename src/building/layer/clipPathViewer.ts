@@ -72,7 +72,6 @@ export class ClipPathViewer {
         this._mousePressed = false;
         this._currentPath.add(point);
         this._currentPath.closed = true;
-        this._currentPath.fillColor = new Color(0.37, 0.58, 0.89, 1);
         this._activeLayer.addPathArea(this._currentPath.clone({insert: false, deep: true}));
         this._currentPath.remove();
 

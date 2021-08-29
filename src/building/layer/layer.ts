@@ -1,4 +1,4 @@
-import { Color, Path, PathItem, Point } from "paper/dist/paper-core";
+import { Color, CompoundPath, Path, PathItem, Point } from "paper/dist/paper-core";
 import { ColorMode, Criteria, DataStructure } from "../../controls/layerControls";
 import { DataPoint } from "../../trees/dataPoint";
 import { criteriaToString, dataStructureToString } from "../../utils/conversionUtil";
@@ -90,32 +90,12 @@ export class Layer {
         }
 
         if(this._pathAreas.length > 0){
-            let selection: paper.PathItem = this._clipPath.intersect(this._pathAreas[0]);
-            for(let i = 1; i < this._pathAreas.length; i++){
-                selection = selection.unite(this._clipPath.intersect(this._pathAreas[i]));
-            }
-            this._clipPath = selection;
+            let tempPath = this._clipPath.clone({deep: true});
+            this._pathAreas.forEach((area: paper.PathItem) => {
+                tempPath = tempPath.subtract(area);
+            });
+            this._clipPath = this._clipPath.exclude(tempPath);
         }
-
-        // if(this._pathAreas.length > 0){
-        //     let selection = PathItem.create(this._pathAreas[0]) as paper.PathItem;
-        //     for(let i = 1; i < this._pathAreas.length; i++){
-        //         selection = selection.unite(PathItem.create(this._pathAreas[i]));
-        //     }
-        //     this._clipPath = selection;
-        // }
-
-    
-
-        // if(this._pathAreas.length > 0){
-        //     let selection: paper.PathItem = this._pathAreas[0];
-        //     selection.fillColor = new Color(1);
-        //     for(let i = 1; i < this._pathAreas.length; i++){
-        //         selection = selection.unite(this._pathAreas[i]);
-        //     }
-        //     // this._clipPath = this._clipPath.intersect(selection);
-        //     this._clipPath = selection;
-        // }
 
         if(scaling)
             this._clipPath.scale(this._scaleX, this._scaleY, new Point(0, 0));
