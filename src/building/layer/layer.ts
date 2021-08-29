@@ -1,4 +1,4 @@
-import { Path, Point } from "paper/dist/paper-core";
+import { Color, Path, PathItem, Point } from "paper/dist/paper-core";
 import { ColorMode, Criteria, DataStructure } from "../../controls/layerControls";
 import { DataPoint } from "../../trees/dataPoint";
 import { criteriaToString, dataStructureToString } from "../../utils/conversionUtil";
@@ -76,19 +76,51 @@ export class Layer {
         }
     }
 
-    public generateClipPath(width: number, height: number, scaling = true): paper.PathItem{
-        const offset = 3
-        this._clipPath = new Path.Rectangle([-offset, -offset, width + offset, height + offset]);
-       
-        if(this._prevLayer)
-            this._clipPath = this._prevLayer.generateClipPath(width, height, scaling);
+    public generateClipPath(width: number, height: number, scaling = true, borderWidth = 3): [paper.PathItem, paper.PathItem]{
+        this._clipPath = new Path.Rectangle([-borderWidth, -borderWidth, width + borderWidth, height + borderWidth]);
+        let usableSpace: paper.PathItem = new Path.Rectangle([-borderWidth, -borderWidth, width + borderWidth, height + borderWidth]);
 
-        this._pathAreas.forEach((area: paper.Path) => {
-            this._clipPath = this._clipPath.subtract(area);
-        });
+        let currentLayer = this._prevLayer;
+        while(currentLayer){
+            currentLayer.pathAreas.forEach((area: paper.PathItem) => {
+                this._clipPath = this._clipPath.subtract(area);
+                usableSpace = usableSpace.subtract(area);
+            });
+            currentLayer = currentLayer.prevLayer;
+        }
+
+        if(this._pathAreas.length > 0){
+            let selection: paper.PathItem = this._clipPath.intersect(this._pathAreas[0]);
+            for(let i = 1; i < this._pathAreas.length; i++){
+                selection = selection.unite(this._clipPath.intersect(this._pathAreas[i]));
+            }
+            this._clipPath = selection;
+        }
+
+        // if(this._pathAreas.length > 0){
+        //     let selection = PathItem.create(this._pathAreas[0]) as paper.PathItem;
+        //     for(let i = 1; i < this._pathAreas.length; i++){
+        //         selection = selection.unite(PathItem.create(this._pathAreas[i]));
+        //     }
+        //     this._clipPath = selection;
+        // }
+
+    
+
+        // if(this._pathAreas.length > 0){
+        //     let selection: paper.PathItem = this._pathAreas[0];
+        //     selection.fillColor = new Color(1);
+        //     for(let i = 1; i < this._pathAreas.length; i++){
+        //         selection = selection.unite(this._pathAreas[i]);
+        //     }
+        //     // this._clipPath = this._clipPath.intersect(selection);
+        //     this._clipPath = selection;
+        // }
+
         if(scaling)
             this._clipPath.scale(this._scaleX, this._scaleY, new Point(0, 0));
-        return this._clipPath;
+        
+        return [this._clipPath, usableSpace];
     }
 
     public get points(){

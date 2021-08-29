@@ -84,7 +84,7 @@ export class SVGBuilder{
         if(!this._tree || this._tree.root == null || !this._layer) 
             return;
 
-        const clipPath = this._layer.generateClipPath(this._width, this._height);
+        const clipPath = this._layer.generateClipPath(this._width, this._height)[0];
 
         this._tree.allTreeNodes(this._tree.root).forEach((each: any) => {
             if(each.path !== null){

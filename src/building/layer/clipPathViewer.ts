@@ -25,14 +25,17 @@ export class ClipPathViewer {
     }
 
     public showClipPath(){
-        const offset = 3;
         this.clear();
-        if(this._activeLayer)
-            this._clipPath = this._activeLayer.generateClipPath(
-                this._canvasSize[0], this._canvasSize[1], false
-            );
-        else
-            this._clipPath = new Path.Rectangle([-offset, -offset, this._canvasSize[0] + offset, this._canvasSize[1] + offset]);
+        if(!this._activeLayer)
+            return;
+        
+        let paths = this._activeLayer.generateClipPath(
+            this._canvasSize[0], this._canvasSize[1], false
+        );
+        this._clipPath = paths[0];
+        let usableSpace = paths[1];
+        usableSpace.fillColor = new Color(0.37, 0.58, 0.89, 0.2);
+      
         
         this._clipPath.fillColor = new Color(0.37, 0.58, 0.89, 0.4);
         this._clipPath.strokeColor = new Color(1);
@@ -69,8 +72,10 @@ export class ClipPathViewer {
         this._mousePressed = false;
         this._currentPath.add(point);
         this._currentPath.closed = true;
+        this._currentPath.fillColor = new Color(0.37, 0.58, 0.89, 1);
+        this._activeLayer.addPathArea(this._currentPath.clone({insert: false, deep: true}));
+        this._currentPath.remove();
 
-        this._activeLayer.addPathArea(this._currentPath);
         this.showClipPath();
     }
 
