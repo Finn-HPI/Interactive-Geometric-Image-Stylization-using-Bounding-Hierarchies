@@ -136,6 +136,27 @@ export class QuadTree extends Tree{
         else 
             br = true;
 
+        tl ||= (node.topLeftChild && node.topLeftChild.path && (node.topLeftChild.path as paper.Path).area < builder.minArea)? true : false;
+        tr ||= (node.topRightChild && node.topRightChild.path && (node.topRightChild.path as paper.Path).area < builder.minArea)? true : false;
+        bl ||= (node.bottomLeftChild && node.bottomLeftChild.path && (node.bottomLeftChild.path as paper.Path).area < builder.minArea)? true : false;
+        br ||= (node.bottomRightChild && node.bottomRightChild.path && (node.bottomRightChild.path as paper.Path).area < builder.minArea)? true : false;
+
+        if(tl && node.topLeftChild && node.topLeftChild.path){
+            this.resetChilds(node.topLeftChild);
+            node.topLeftChild.path = null;
+        }
+        if(tr && node.topRightChild && node.topRightChild.path){
+            this.resetChilds(node.topRightChild);
+            node.topRightChild.path = null;
+        }
+        if(bl && node.bottomLeftChild && node.bottomLeftChild.path){
+            this.resetChilds(node.bottomLeftChild);
+            node.bottomLeftChild.path = null;
+        }
+        if(br && node.bottomRightChild && node.bottomRightChild.path){
+            this.resetChilds(node.bottomRightChild);
+            node.bottomRightChild.path = null;
+        }
         if(tl || tr || bl || br){
 
             let rectangle = new Rectangle(
@@ -208,6 +229,29 @@ export class QuadTree extends Tree{
 
             rect.fillColor = node.color;
             node.path = rect;
+        }
+    }
+
+    public removeDetail(minArea = 0, sameColors = false){
+        let node = this._root;
+        while(node && node.path){
+            if((node.path as paper.Path).area < minArea){
+                this.resetChilds(node);
+                break;
+            }
+        }
+    }
+
+    public applyFuncOnChilds(node: QuadNode, func: (node: QuadNode) => void){
+        if(node){
+            if(node.topLeftChild)
+                func(node.topLeftChild);
+            if(node.topRightChild)
+                func(node.topRightChild);
+            if(node.bottomLeftChild)
+                func(node.bottomLeftChild);
+            if(node.bottomRightChild)
+                func(node.bottomRightChild);
         }
     }
 

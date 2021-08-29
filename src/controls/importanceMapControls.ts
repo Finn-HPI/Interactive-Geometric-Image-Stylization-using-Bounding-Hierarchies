@@ -3,12 +3,15 @@ import { Config } from "../config/config";
 import { BrushTool } from "../lod/brushTool";
 import { Controls } from "../utils/htmlUtil";
 import { ImageRenderer } from "../webgl/renderer";
+import { LayerControls } from "./layerControls";
 
 export class ImportanceMapControls {
 
     protected _controls!: [Controls, Controls, Controls];
     protected _renderer!: ImageRenderer;
     protected _brush!: BrushTool;
+
+    protected _layerControls!: LayerControls;
 
     protected _settings!: Map<string, [number, number, HTMLInputElement, HTMLInputElement]>;
 
@@ -257,11 +260,18 @@ export class ImportanceMapControls {
             this.getCurrentValueItem('normaly'),
             this.getCurrentValueItem('normalz')
         ]) || ignore;
+
         if(changed){
             this._settings.forEach((value: [number, number, HTMLInputElement, HTMLInputElement]) => {
                 this._renderer.updateConfiguration(value[0], value[1]);
             });
+            
             Config.setApplyIgnore('importance');
+            this._layerControls.refreshExistingLayers();
         }
+    }
+
+    public set layerControls(controls: LayerControls){
+        this._layerControls = controls;
     }
 }

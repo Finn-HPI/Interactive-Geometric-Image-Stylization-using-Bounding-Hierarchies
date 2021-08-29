@@ -280,6 +280,13 @@ export class ImageRenderer extends Renderer {
         return this.dumpPixelData();
     }
 
+    public getEncodedRGBImage(){
+        this._mode = Mode.NORMAL;
+        this._renderPass.layerMode = 0;
+        this.onFrame();
+        return (document.getElementById('webgl-canvas') as HTMLCanvasElement).toDataURL();
+    }
+
     public getRGBAData(){
         this._mode = Mode.NORMAL_EXPORT;
         this._renderPass.layerMode = 0;
@@ -307,8 +314,8 @@ export class ImageRenderer extends Renderer {
 
     public getMaskData(){
         let ctx = ((document.getElementById('mask-canvas') as HTMLCanvasElement).getContext('2d') as CanvasRenderingContext2D);
-        // return ctx.getImageData(0, 0, this.canvasSize[0], this.canvasSize[1]).data;
-        return new Uint8ClampedArray(this._canvasSize[0] * this._canvasSize[1] * 4);
+        return ctx.getImageData(0, 0, this.canvasSize[0], this.canvasSize[1]).data;
+        // return new Uint8ClampedArray(this._canvasSize[0] * this._canvasSize[1] * 4);
     }
 
     public set layerMode(mode: number){

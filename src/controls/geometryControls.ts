@@ -1,4 +1,7 @@
+import { GlTFBuilder } from "../building/builder/glTFBuilder";
+import { SVGBuilder } from "../building/builder/svgBuilder";
 import { Config } from "../config/config";
+import { VPTree } from "../trees/vp/vpTree";
 import { Controls } from "../utils/htmlUtil";
 import { ImageRenderer } from "../webgl/renderer";
 
@@ -9,6 +12,11 @@ export enum ExportMode {
 export class GeometryControls {
 
     protected _controls!: [Controls, Controls];
+    protected _renderer!: ImageRenderer;
+    
+    protected _glTFBuilder!: GlTFBuilder;
+    protected _svgBuilder!: SVGBuilder;
+
     protected _exportModes: Map<string, ExportMode> = new Map<string, ExportMode>([
         ['Color', ExportMode.COLOR],
         ['Texture', ExportMode.TEXTURE]
@@ -37,6 +45,21 @@ export class GeometryControls {
     }
 
     public export(){
+        
+        let canvas = document.getElementById('webgl-canvas') as HTMLCanvasElement;
+        // this._glTFBuilder.fromTree(this._svgBuilder.tree, canvas.width, canvas.height, this._renderer.getEncodedRGBImage());
+        this._glTFBuilder.fromColorGroups(this._svgBuilder.colorGroups, canvas.width, canvas.height, this._renderer.getEncodedRGBImage());
+    }
 
+    public set glTFBuilder(builder: GlTFBuilder){
+        this._glTFBuilder = builder;
+    }
+
+    public set svgBuilder(builder: SVGBuilder){
+        this._svgBuilder = builder;
+    }
+
+    public set renderer(renderer: ImageRenderer){
+        this._renderer = renderer;
     }
 }

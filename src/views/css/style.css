@@ -51,6 +51,11 @@ svg {
     z-index: 3;
 }
 
+#gltf-canvas {
+    position: absolute;
+    z-index: 3;
+}
+
 .light-border {
     border-width: 1px;
     border-color: #ced4da;

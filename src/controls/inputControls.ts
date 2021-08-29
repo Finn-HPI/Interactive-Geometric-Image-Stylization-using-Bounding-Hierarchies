@@ -84,6 +84,7 @@ export class InputControls {
 
         let imageChanged = Config.updateValue('image', this._imageSelection) || ignore;
         let layerChanged = Config.updateValue('layer', this._layerMode) || ignore;
+        
         Config.setApplyIgnore('input');
         let promise = new Promise((resolve, reject) => {
             if(imageChanged){

@@ -118,6 +118,19 @@ export class KdTree extends Tree{
         else    
             r = true;
 
+        l ||= (node.left && node.left.path && (node.left.path as paper.Path).area < builder.minArea)? true : false;
+        r ||= (node.right && node.right.path && (node.right.path as paper.Path).area < builder.minArea)? true : false;
+
+        if(l && node.left && node.left.path){
+            this.resetChilds(node.left);
+            node.left.path = null;
+        }
+
+        if(r && node.right && node.right.path){
+            this.resetChilds(node.right);
+            node.right.path = null;
+        }
+
         if(l && r)
             rect = new Path.Rectangle(area);
         else if(l)
@@ -130,6 +143,15 @@ export class KdTree extends Tree{
                 builder.minUsedLevel = level;
             rect.fillColor = node.color;
             node.path = rect;
+        }
+    }
+
+    public applyFuncOnChilds(node: KdNode, func: (node: KdNode) => void){
+        if(node){
+            if(node.left)
+                func(node.left);
+            if(node.right)
+                func(node.right)
         }
     }
 

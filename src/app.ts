@@ -1,4 +1,5 @@
 import { Canvas } from "webgl-operate";
+import { GlTFBuilder } from "./building/builder/glTFBuilder";
 import { SVGBuilder } from "./building/builder/svgBuilder";
 import { LayerViewer } from "./building/layer/layerViewer";
 import { Config } from "./config/config";
@@ -26,6 +27,9 @@ export class Application {
 
         Config.setDefault();
 
+        let svgBuilder = new SVGBuilder();
+        let glTFBuilder = new GlTFBuilder();
+
         this._noiseViewer = new NoiseViewer(this._renderer.canvasSize);
         this._layerViewer = new LayerViewer(this._renderer.canvasSize);
 
@@ -35,14 +39,7 @@ export class Application {
         let inputControls = new InputControls('input-container', 'input-apply-container');
         inputControls.renderer = this._renderer;
         inputControls.setup();
-    
-        let importanceMapControls = new ImportanceMapControls(
-            'global-importance-container', 
-            'local-importance-container',
-            'importance-apply-container'
-        );
-        importanceMapControls.renderer = this._renderer;
-        importanceMapControls.setup();
+
 
         let layerControls = new LayerControls(
             'layer-container', 
@@ -54,6 +51,15 @@ export class Application {
         layerControls.renderer = this._renderer;
         layerControls.setup();
         Config.layerControls = layerControls;
+
+        let importanceMapControls = new ImportanceMapControls(
+            'global-importance-container', 
+            'local-importance-container',
+            'importance-apply-container'
+        );
+        importanceMapControls.renderer = this._renderer;
+        importanceMapControls.layerControls = layerControls;
+        importanceMapControls.setup();
     
         let seedingControls = new SeedingControls(
             'sampling-container', 
@@ -67,10 +73,19 @@ export class Application {
         seedingControls.setup();
     
         let geometryControls = new GeometryControls('gltf-container', 'geometry-export-container');
+        geometryControls.glTFBuilder = glTFBuilder;
+        geometryControls.renderer = this._renderer;
+        geometryControls.svgBuilder = svgBuilder;
         geometryControls.setup();
     
-        let vectorControls = new VectorControls('svg-gen-container', 'colBook-container');
+        let vectorControls = new VectorControls(
+            'svg-gen-container', 
+            'appearance-container', 
+            'appearance-apply-container', 
+            'colBook-container'
+        );
         vectorControls.renderer = this._renderer;
+        vectorControls.svgBuilder = svgBuilder;
         vectorControls.setup();
 
         inputControls.layerControls = layerControls;

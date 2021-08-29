@@ -7,6 +7,7 @@ export class BrushTool {
     protected _intensity!: number;
     protected _strokeSize!: number;
     protected _color!: paper.Color;
+    protected _ref!: HTMLCanvasElement;
 
     protected _canMove = false;
 
@@ -27,16 +28,25 @@ export class BrushTool {
     private init(){
         this._intensity = 0;
         this._color = new Color(1,1,1,0);
+        this._ref = document.getElementById('webgl-canvas') as HTMLCanvasElement;
+        this.checkForResize();
     }
 
     public mouseButtonIsDown(buttons: number) {
         return ((0b01 & buttons) === 0b01);
     }
 
-    private convertPoint(point: [number, number]): [number, number]{
-        let xScale = this._context.canvas.width / this._context.canvas.clientWidth;
-        let yScale = this._context.canvas.height / this._context.canvas.clientHeight;
+    private checkForResize(){
+        if(this._context.canvas.width != this._ref.width ||
+            this._context.canvas.height != this._ref.height){
+                this._context.canvas.setAttribute('width', String(this._ref.width));
+                this._context.canvas.setAttribute('height', String(this._ref.height));
+        }
+    }
 
+    private convertPoint(point: [number, number]): [number, number]{
+        let xScale = this._ref.width / this._context.canvas.clientWidth;
+        let yScale = this._ref.height / this._context.canvas.clientHeight;
         return [point[0] * xScale, point[1] * yScale];
     }
 
@@ -47,8 +57,6 @@ export class BrushTool {
 
         this._color.alpha = this._intensity;
         this._context.strokeStyle = colorToHex(this._color);
-
-        console.log(this._intensity, this._strokeSize);
         this._context.lineWidth = this._strokeSize;
         this._context.lineCap = 'round';
         this._context.lineJoin = 'round';
@@ -59,6 +67,7 @@ export class BrushTool {
     }
 
     public startStroke(point: [number, number]){
+        this.checkForResize();
         point = this.convertPoint(point);
         this._drawing = true;
         this._latestPoint = point;

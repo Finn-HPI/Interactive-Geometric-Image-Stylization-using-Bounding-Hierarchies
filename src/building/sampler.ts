@@ -35,16 +35,6 @@ export class Sampler{
     public generateSampleData(){
         return new Promise((resolve, reject) => {
             this.init();
-            
-                // this.gatherData().then((res) => {
-                //     this.createSamplePoints(
-                //         this._renderer.canvasSize[0], this._renderer.canvasSize[1]
-                //     ).then((res) => {
-                //         this.colorQuantizeSamplePoints().then((res) => {
-                //             resolve('sampled');
-                //         });
-                //     });
-                // });
                 this.gatherData();
                 this.createSamplePoints(
                     this._renderer.canvasSize[0], this._renderer.canvasSize[1]);
@@ -79,6 +69,7 @@ export class Sampler{
     }
 
     private createSamplePoints(width: number, height: number){
+        console.log(this._maskData, width, height);
         return new Promise((resolve, reject) => {
             let r, g, b = 0;
         for(let x = 0; x < width; x++)

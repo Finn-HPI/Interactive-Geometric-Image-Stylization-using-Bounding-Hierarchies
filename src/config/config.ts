@@ -5,7 +5,7 @@ import { colorModeToString, criteriaToString, dataStructureToString, stringToCol
 
 export interface ValueItem {
     name: string,
-    value: number|string
+    value: number | string
 };
 
 interface LayerItem {
@@ -96,7 +96,7 @@ export class Config {
             this._htmlElements.set(list[i].name, list[i].element);
     }   
 
-    static updateValue(name: string, value: number|string): boolean{
+    static updateValue(name: string, value: number | string): boolean{
         let changed = false;
         let index = this._config.input.findIndex((item: ValueItem) => {
             return item.name === name
@@ -112,9 +112,9 @@ export class Config {
         return changed;
     }
 
-    static updateValues(items: Array<[string, number|string]>){
+    static updateValues(items: Array<[string, number | string]>){
         let changed = false;
-        items.forEach((item: [string, number|string]) => {
+        items.forEach((item: [string, number | string]) => {
             let result = this.updateValue(item[0], item[1]);
             changed ||= result;
         });
@@ -247,5 +247,4 @@ export class Config {
     static setApplyIgnore(name: string, value = false){
         this._applyIgnore.set(name, value);
     }
-
 }

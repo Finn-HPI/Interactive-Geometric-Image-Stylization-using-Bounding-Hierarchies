@@ -1,3 +1,4 @@
+import { Color } from "paper/dist/paper-core";
 import { ValueItem } from "./config";
 
 export function defaultApplyIgnore(): Map<string, boolean>{
@@ -41,6 +42,13 @@ export function defaultValues(): ValueItem[]{
         {name: 'to', value: 255},
         {name: 'color', value: 0},
         {name: 'maxLevel', value: 15},
-        {name: 'minArea', value: 20}
+        {name: 'minArea', value: 20},
+        //vector
+        {name: 'colorMode', value: 0},
+        {name: 'borderMode', value: 1},
+        {name: 'border0', value: 0.3},
+        {name: 'border1', value: 0.3},
+        {name: 'color0', value: '#000000'},
+        {name: 'color1', value: '#000000'},
     ];
 }

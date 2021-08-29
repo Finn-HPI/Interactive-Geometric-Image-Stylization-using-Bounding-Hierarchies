@@ -1,9 +1,7 @@
-import { PathItem } from "paper/dist/paper-core";
 import { Config } from "../../config/config";
 import { ExportMode } from "../../controls/geometryControls";
 import { TreeNode } from "../../trees/node";
 import { bytesToBase64 } from "../../utils/base64";
-import { getColorFromHex } from "../../utils/colorUtil";
 
 export class GlTFBuilder {
 
@@ -17,68 +15,34 @@ export class GlTFBuilder {
     protected _height!: number;
 
     protected _lastIndex = 0;
-    protected _vertices!: Array<number>;
-    protected _indices!: Array<number>;
-    protected _colors!: Array<number>;
-    protected _texCoords!: Array<number>;
+    protected _vertices = new Array<number>();
+    protected _indices = new Array<number>();
+    protected _colors = new Array<number>();
+    protected _texCoords = new Array<number>();
 
-    protected _centers!: Array<number>;
-    protected _offsets!: Array<number>;
+    protected _centers = new Array<number>();
+    protected _offsets = new Array<number>();
 
     protected _encodedImage!: string;
 
-    protected _minMaxInfo!: {
-        minIndex: number,
-        maxIndex: number,
-        minX: number, maxX: number, 
-        minY: number, maxY: number, 
-        minZ: number, maxZ: number,
-        minUVX: number, maxUVX: number, 
-        minUVY: number, maxUVY: number,
-        minRed: number, maxRed: number,
-        minGreen: number, maxGreen: number,
-        minBlue: number, maxBlue: number,
-        minCenterX: number, maxCenterX: number,
-        minCenterY: number, maxCenterY: number,
-        minCenterZ: number, maxCenterZ: number,
-        minOffsetX: number, maxOffsetX: number,
-        minOffsetY: number, maxOffsetY: number,
-        minOffsetZ: number, maxOffsetZ: number
+    protected _minMaxInfo = {
+        minIndex: 0,
+        maxIndex: 0,
+        minX: 0, maxX: 0, 
+        minY: 0, maxY: 0, 
+        minZ: 0, maxZ: 0,
+        minUVX: 0, maxUVX: 0, 
+        minUVY: 0, maxUVY: 0,
+        minRed: 0, maxRed: 0,
+        minGreen: 0, maxGreen: 0,
+        minBlue: 0, maxBlue: 0,
+        minCenterX: 0, maxCenterX: 0,
+        minCenterY: 0, maxCenterY: 0,
+        minCenterZ: 0, maxCenterZ: 0,
+        minOffsetX: 0, maxOffsetX: 0,
+        minOffsetY: 0, maxOffsetY: 0,
+        minOffsetZ: 0, maxOffsetZ: 0
     };
-
-    public constructor(){
-        this.init();
-    }
-
-    private init(){
-        this._lastIndex = 0;
-        this._vertices = new Array<number>();
-        this._indices = new Array<number>();
-        this._colors = new Array<number>();
-        this._texCoords = new Array<number>();
-    
-        this._centers = new Array<number>();
-        this._offsets = new Array<number>();
-
-        this._minMaxInfo = {
-            minIndex: 0,
-            maxIndex: 0,
-            minX: 0, maxX: 0, 
-            minY: 0, maxY: 0, 
-            minZ: 0, maxZ: 0,
-            minUVX: 0, maxUVX: 0, 
-            minUVY: 0, maxUVY: 0,
-            minRed: 0, maxRed: 0,
-            minGreen: 0, maxGreen: 0,
-            minBlue: 0, maxBlue: 0,
-            minCenterX: 0, maxCenterX: 0,
-            minCenterY: 0, maxCenterY: 0,
-            minCenterZ: 0, maxCenterZ: 0,
-            minOffsetX: 0, maxOffsetX: 0,
-            minOffsetY: 0, maxOffsetY: 0,
-            minOffsetZ: 0, maxOffsetZ: 0
-        };
-    }
 
     public preprocessAndBuild(){
         let paddingLength = 0;
@@ -125,25 +89,26 @@ export class GlTFBuilder {
         );
     }
 
-    private async triangulatePath(path: string, pathDepth: number, color: paper.Color){
+    private extractDataFromPath(
+        node: TreeNode,
+        path: paper.PathItem
+    ){
         const earcut = require('earcut');
-        const { pathDataToPolys } = require('svg-path-to-polygons');
-        
         let poly = new Array<number>();
-        let points = pathDataToPolys(path, 10, {tolerance:1, decimals:1});
-        points[0].forEach((item: [number, number]) => {
-            let point = this.normalizePoint(item[0], item[1], this._width, this._height);
-            poly.push(point[0], point[1]);
-            const depth = pathDepth / 255 - 0.5;
+
+        (path as paper.Path).segments.forEach((segment: paper.Segment) => {
+            let point = this.normalizePoint(segment.point.x, segment.point.y, this._width, this._height);
+            poly.push(point[0]);
+            poly.push(point[1]);
+            
+            const depth = node.depth / 255 - 0.5;
             this._vertices.push(point[0]);
             this._vertices.push(point[1]);
             this._vertices.push(depth);
 
-            let pathItem = PathItem.create(path);
-
             let center = this.normalizePoint(
-                pathItem.bounds.center.x,
-                pathItem.bounds.center.y,
+                (node.path as paper.PathItem).bounds.center.x,
+                (node.path as paper.PathItem).bounds.center.y,
                 this._width,
                 this._height
             );
@@ -157,14 +122,13 @@ export class GlTFBuilder {
             this._offsets.push(point[1] - center[0]);
             this._offsets.push(0);
 
-            this._colors.push(color.red);
-            this._colors.push(color.green);
-            this._colors.push(color.blue);
+            this._colors.push(node.color.red);
+            this._colors.push(node.color.green);
+            this._colors.push(node.color.blue);
 
-            this._texCoords.push(item[0] / this._width);
-            this._texCoords.push(item[1] / this._height);
+            this._texCoords.push(segment.point.x / this._width);
+            this._texCoords.push(segment.point.y / this._height);
         });
-
         let polyIndices: Array<number> = earcut(poly);
         for(let i = 0; i < polyIndices.length - 2; i++){
             this._indices.push(polyIndices[i] + this._lastIndex);
@@ -174,37 +138,23 @@ export class GlTFBuilder {
         this._lastIndex = this._vertices.length / 3;
     }
 
-    public fromColorGroups(groups: Map<string, Array<string>>, width: number, height: number, encoded_image: string){
-        this.init();
+    public fromTree(tree: any, width: number, height: number, encoded_image: string){
         this._encodedImage = encoded_image;
         this._width = width;
         this._height = height;
-        
-        groups.forEach((value: Array<string>, key: string) => {
-            value.forEach((item: string) => {
-                let pathRegex = item.match(/path d="([^"]*)"/);
-                let depthRegex = item.match(/depth="([^"]*)"/);
-                let groupColorRegex = key.match(/fill="([^"]*)"/);
-                let colorRegex = item.match(/fill="([^"]*)"/);
 
-                let color;
-                let depth;
-
-                if(groupColorRegex && groupColorRegex[1].length > 0)
-                    color = getColorFromHex(groupColorRegex[1]);
-
-                if(colorRegex && colorRegex[1].length > 0 && colorRegex[1] != 'none')
-                    color = getColorFromHex(colorRegex[1]);
-
-                if(color && pathRegex && depthRegex && pathRegex[1].length > 0 && depthRegex.length > 0){
-                    depth = Number(depthRegex[1])
-                    this.triangulatePath(pathRegex[1], depth, color);
-                }
-            });
+        tree.allTreeNodes(tree.root).forEach((each: TreeNode) => {
+            if(each.path !== null){
+                if(each.childPaths.length >= 1)
+                    each.childPaths.forEach((child: paper.PathItem) => {
+                        this.extractDataFromPath(each, child);
+                    });
+                else
+                    this.extractDataFromPath(each, each.path)
+            }
         });
-        console.log('finish');
+        
         this.gatherMinAndMaxInfo();
-        console.log(this);
         this.preprocessAndBuild();
     }
 
@@ -463,10 +413,6 @@ export class GlTFBuilder {
     }
 
     private gatherMinAndMaxInfo(){
-
-        // console.log(this._minMaxInfo);
-        // console.log(this._indices.length, this._vertices.length);
-        // console.log(this._indices, this._vertices);
         this._minMaxInfo.minIndex = this._indices[0];
         this._minMaxInfo.maxIndex = this._indices[0];
 
@@ -511,8 +457,6 @@ export class GlTFBuilder {
 
         this._minMaxInfo.minOffsetZ = this._offsets[2];
         this._minMaxInfo.maxOffsetZ = this._offsets[2];
-
-        console.log(this._minMaxInfo);
 
         this._indices.forEach((index: number) => {
             if(index < this._minMaxInfo.minIndex)

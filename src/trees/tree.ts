@@ -30,6 +30,14 @@ export abstract class Tree {
         return nodes;
     }
 
+    abstract applyFuncOnChilds(node: any, func: (node: any) => void): void;
+
+    public resetChilds(node: any){
+        this.applyFuncOnChilds(node, (node) => {
+            node.path = null;
+        });
+    }
+    
     public abstract get root(): any;
        
     public getColor(node: any){

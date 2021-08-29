@@ -29,11 +29,13 @@ function render(hashKey) {
     let layerCanvas = document.getElementById('layer-canvas');
     let maskCanvas = document.getElementById('mask-canvas');
     let svgCanvas = document.getElementById('svg-canvas');
+    let gltfCanvas = document.getElementById('gltf-canvas');
 
     pointCanvas.style.display = 'none';
     layerCanvas.style.display = 'none';
     maskCanvas.style.display = 'none';
     svgCanvas.style.display = 'none';
+    gltfCanvas.style.display = 'none';
 
     switch(hashKey){
         case '':
@@ -47,6 +49,7 @@ function render(hashKey) {
             tabs[0].style.backgroundColor = selected;
             break;
         case '#3d':
+            gltfCanvas.style.display = 'block';
             pages[1].style.display = 'block';
             tabs[1].style.backgroundColor = selected;
             break;

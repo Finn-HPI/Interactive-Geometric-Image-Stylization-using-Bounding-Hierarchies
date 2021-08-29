@@ -195,7 +195,6 @@ export class VPTree extends Tree{
             return intersect;
 
         let path: paper.PathItem | null = null;
-
         if(l !== null && r !== null)
             path = l.unite(r);
         else if(l !== null)
@@ -206,8 +205,34 @@ export class VPTree extends Tree{
         if(path !== null){
             node.path = node.path.subtract(path);
         }
+        return (path && node.path)? path.unite(node.path) : null;
+    }
 
-        return path == null? null : path.unite(node.path);
+    public removeDetail(){
+        removeCheckNodePath(this._root as VPNode, this);
+
+        function removeCheckNodePath(node: VPNode, tree: VPTree){
+            if(node && node.path){
+                if(node.left && node.left.path && node.left.color === node.color){
+                    node.path = node.path.unite(node.left.path);
+                    tree.resetChilds(node);
+                    return;
+                }
+                if(node.left)
+                    removeCheckNodePath(node.left, tree);
+                if(node.right)
+                    removeCheckNodePath(node.right, tree);
+            }
+        }
+    }
+
+    public applyFuncOnChilds(node: VPNode, func: (node: VPNode) => void){
+        if(node){
+            if(node.left)
+                func(node.left);
+            if(node.right)
+                func(node.right)
+        }
     }
 
     public get root(){

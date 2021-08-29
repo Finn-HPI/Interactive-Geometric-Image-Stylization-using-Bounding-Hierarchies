@@ -1,4 +1,4 @@
-import { PaperScope, Path, Point} from "paper/dist/paper-core";
+import { Color, PaperScope, Path, Point} from "paper/dist/paper-core";
 import { DataPoint } from "../../trees/dataPoint";
 import { Layer } from "./layer";
 
