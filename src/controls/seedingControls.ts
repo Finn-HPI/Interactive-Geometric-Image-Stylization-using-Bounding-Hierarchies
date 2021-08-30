@@ -166,6 +166,11 @@ export class SeedingControls {
                 this._layerControls.refreshExistingLayers();
             }
 
+            if(this._samplingMode == NoiseMode.SIMPLE){
+                this._renderer.mode = Mode.SAMPLE;
+                this._renderer.updateChange();
+            }
+
             if(!samplingChanged)
                 resolve('finished');
         });

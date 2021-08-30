@@ -338,7 +338,7 @@ export class Controls {
     }
 
     public createFileInput(
-        label: string,
+        label: string|undefined,
         accept?: string,
         multiple = false,
         placeholder = '',

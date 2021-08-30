@@ -2,6 +2,7 @@ import { Layer } from "../building/layer/layer";
 import { defaultApplyIgnore, defaultValues } from "./default";
 import { LayerControls } from "../controls/layerControls";
 import { colorModeToString, criteriaToString, dataStructureToString, stringToColorMode, stringToCriteria, stringToDataStructure } from "../utils/conversionUtil";
+import { Path, PathItem } from "paper/dist/paper-core";
 
 export interface ValueItem {
     name: string,
@@ -16,7 +17,9 @@ interface LayerItem {
     from: number,
     to: number,
     maxLevel: number,
-    minArea: number
+    minArea: number,
+    paths: string[],
+    scaling: [number, number]
 }
 
 interface ConfigFormat{
@@ -82,6 +85,14 @@ export class Config {
                         stringToColorMode(item.color)
                     );
                     this._layerControls.createLayer(layer, false, false);
+                    
+                    this._layerControls.acitvateScope();
+                    item.paths.forEach((pathData: string) => {
+                        layer.addPathArea(new Path(pathData), false);
+                    });
+
+                    layer.scaleX = item.scaling[0];
+                    layer.scaleY = item.scaling[1];
                 });
             });
         }
@@ -166,7 +177,9 @@ export class Config {
                 from: layer.from,
                 to: layer.to,
                 maxLevel: layer.maxLevel,
-                minArea: layer.minArea
+                minArea: layer.minArea,
+                paths: [],
+                scaling: [1,1]
             });
         this._nextLayerNum++;
     }
@@ -227,6 +240,35 @@ export class Config {
 
     static getHtmlElement(name: string){
         return this._htmlElements.get(name);
+    }
+
+    static setScaleOfLayer(scaling: [number, number], layer: Layer){
+        let layerI = this.getLayerItem(layer);
+        if(layerI)
+            layerI.scaling = scaling;
+    }
+
+    static addPathToLayer(area: paper.Path, layer: Layer){
+        let layerI = this.getLayerItem(layer);
+        if(layerI)
+            layerI.paths.push(area.pathData);
+    }
+
+    static removePathFromLayer(pathIndex: number, layer: Layer){
+        let layerI = this.getLayerItem(layer);
+        if(layerI)
+            layerI.paths.splice(pathIndex, 1);
+    }
+
+    static getLayerItem(layer: Layer){
+        let layerParts = this.layers.get(layer);
+        if(!layerParts)
+            return null;
+        
+        const index = layerParts[0];
+        if (index > -1)
+            return this._config.layers[index]
+        return null;
     }
 
     static get config(){

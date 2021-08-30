@@ -159,7 +159,7 @@ export class KdTree extends Tree{
     public nodeToSVG(node: KdNode, area: paper.Rectangle, level: number, builder: SVGBuilder){
         if(node == null || node.point == null)
             return;
-            
+
         if(level > builder.maxUsedLevel)
             builder.maxUsedLevel = level;
         

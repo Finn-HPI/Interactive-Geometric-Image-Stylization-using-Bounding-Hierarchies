@@ -46,6 +46,13 @@ svg {
 	border: none;
 }
 
+#gltf-background-canvas {
+    position: absolute;
+    z-index: 2;
+    background-color: #48494a;
+	border: none;
+}
+
 #clip-canvas {
     position: absolute;
     z-index: 3;
@@ -212,3 +219,14 @@ a:visited {
     cursor: pointer;
 }
 
+input[type=file] {
+    display: none;
+}
+
+.fileInputWrapper > input {
+    margin: 0;
+}
+
+model-viewer#gltf-canvas {
+    --poster-color: transparent;
+}

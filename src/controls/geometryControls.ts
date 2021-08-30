@@ -1,6 +1,7 @@
 import { GlTFBuilder } from "../building/builder/glTFBuilder";
 import { SVGBuilder } from "../building/builder/svgBuilder";
 import { Config } from "../config/config";
+import { setProgress } from "../global/progressbar";
 import { Controls } from "../utils/htmlUtil";
 import { ImageRenderer } from "../webgl/renderer";
 
@@ -45,7 +46,7 @@ export class GeometryControls {
             this.export();
         });
 
-        const importButton = this._controls[2].createFileInput('Import');
+        const importButton = this._controls[2].createFileInput(undefined);
 
         importButton.addEventListener('click', (event) => {
             this.import(event);
@@ -62,9 +63,13 @@ export class GeometryControls {
         if (!file)
             return;
         const reader = new FileReader();
+        reader.onprogress = (event: ProgressEvent) => {
+            setProgress(event.loaded / event.total);
+        };
         reader.onload = () => {
             this.changeGltfSource(reader.result as string);
             console.log(reader.result as string);
+            setProgress(0);
         };
         reader.readAsDataURL(file);
     }

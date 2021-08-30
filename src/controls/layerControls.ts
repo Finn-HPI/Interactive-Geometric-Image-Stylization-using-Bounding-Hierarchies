@@ -9,7 +9,7 @@ import { InputControls } from "./inputControls";
 import { ImportanceMapControls } from "./importanceMapControls";
 import { SeedingControls } from "./seedingControls";
 import { ClipPathViewer } from "../building/layer/clipPathViewer";
-import { Point } from "paper/dist/paper-core";
+import { Path, Point } from "paper/dist/paper-core";
 
 export enum DataStructure {
     VP, QUAD, KD
@@ -205,6 +205,7 @@ export class LayerControls {
             Config.removeLayer(layer);
         });
 
+        this.acitvateScope();
         const scaling = this._clipViewer.getScaling();
         layer.scaleX = scaling[0];
         layer.scaleY = scaling[1];
@@ -238,6 +239,10 @@ export class LayerControls {
             key.points = this._sampler.samplePoints;
         });
         Config.needsRefresh = false;
+    }
+
+    public acitvateScope(){
+        this._clipViewer.setup();
     }
 
     public set layerViewer(viewer: LayerViewer){

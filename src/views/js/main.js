@@ -31,6 +31,7 @@ function render(hashKey) {
     let maskCanvas = document.getElementById('mask-canvas');
     let svgCanvas = document.getElementById('svg-canvas');
     let gltfCanvas = document.getElementById('gltf-canvas');
+    let gltfBackCanvas = document.getElementById('gltf-background-canvas');
 
     pointCanvas.style.display = 'none';
     layerCanvas.style.display = 'none';
@@ -38,6 +39,7 @@ function render(hashKey) {
     maskCanvas.style.display = 'none';
     svgCanvas.style.display = 'none';
     gltfCanvas.style.display = 'none';
+    gltfBackCanvas.style.display = 'none';
 
     switch(hashKey){
         case '':
@@ -50,31 +52,32 @@ function render(hashKey) {
             pages[0].style.display = 'block';
             tabs[0].style.backgroundColor = selected;
             break;
-        case '#3d':
-            gltfCanvas.style.display = 'block';
+        case '#input':
             pages[1].style.display = 'block';
             tabs[1].style.backgroundColor = selected;
             break;
-        case '#input':
-            pages[2].style.display = 'block';
-            tabs[2].style.backgroundColor = selected;
-            break;
         case '#importance-map':
             maskCanvas.style.display = 'block';
-            pages[3].style.display = 'block';
-            tabs[3].style.backgroundColor = selected;
+            pages[2].style.display = 'block';
+            tabs[2].style.backgroundColor = selected;
             break;
         case '#layer':
             layerCanvas.style.display = 'block';
             clipCanvas.style.display = 'block';
-            pages[4].style.display = 'block';
-            tabs[4].style.backgroundColor = selected;
+            pages[3].style.display = 'block';
+            tabs[3].style.backgroundColor = selected;
             break;
         case '#sampling':
             pointCanvas.style.display = 'block';
-            pages[5].style.display = 'block';
-            tabs[5].style.backgroundColor = selected;
+            pages[4].style.display = 'block';
+            tabs[4].style.backgroundColor = selected;
             break;
+        case '#3d':
+                gltfCanvas.style.display = 'block';
+                gltfBackCanvas.style.display = 'block';
+                pages[5].style.display = 'block';
+                tabs[5].style.backgroundColor = selected;
+                break;
         default:
             pages[0].style.display = 'block';
             tabs[0].style.backgroundColor = selected;

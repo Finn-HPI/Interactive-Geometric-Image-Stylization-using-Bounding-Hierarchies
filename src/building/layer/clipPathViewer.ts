@@ -18,9 +18,13 @@ export class ClipPathViewer {
     }
 
     public activateLayer(layer: Layer){
-        this._scope.setup('clip-canvas');
+        this.setup() 
         this._activeLayer = layer;
         this.showClipPath();
+    }
+
+    public setup(){
+        this._scope.setup('clip-canvas');
     }
 
     public showClipPath(){
@@ -50,7 +54,7 @@ export class ClipPathViewer {
     public mouseDown(point: paper.Point){
         if(this._activeLayer == undefined)
             return;
-
+        
         this._scope.activate();
         this._mousePressed = true;
 
@@ -97,9 +101,13 @@ export class ClipPathViewer {
     }
 
     public getScaling(){
-        this._scope.setup('clip-canvas');
+        this._scope.activate();
         const xScale = this._canvasSize[0] / this._scope.view.viewSize.width;
         const yScale = this._canvasSize[1]  /this._scope.view.viewSize.height;
         return [xScale, yScale];
+    }
+
+    public get scope(){
+        return this._scope;
     }
 }

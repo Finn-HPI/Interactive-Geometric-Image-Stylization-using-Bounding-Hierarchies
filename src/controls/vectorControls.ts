@@ -99,7 +99,7 @@ export class VectorControls {
             Config.updateValue('color1', hex);
         });
 
-        const applyButton = this._controls[2].createActionButton('Apply on existing SVG', 'btn-warning');
+        const applyButton = this._controls[2].createActionButton('Apply on existing SVG', 'btn-primary');
         applyButton.addEventListener('click', () => {
             if(!this._svgBuilder.isEmpty()){
                 this._svgBuilder.applyAppearanceSettings();

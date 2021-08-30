@@ -1,4 +1,5 @@
 import { Color, CompoundPath, Path, PathItem, Point } from "paper/dist/paper-core";
+import { Config } from "../../config/config";
 import { ColorMode, Criteria, DataStructure } from "../../controls/layerControls";
 import { DataPoint } from "../../trees/dataPoint";
 import { criteriaToString, dataStructureToString } from "../../utils/conversionUtil";
@@ -172,14 +173,17 @@ export class Layer {
         return criteriaToString(this._criteria) + ' [' + dataStructureToString(this._structure) + ': ' + this._from + ' - ' + this._to + ']'
     }
 
-    public addPathArea(area: paper.Path){
+    public addPathArea(area: paper.Path, writeToConfig = true){
+        if(writeToConfig) Config.addPathToLayer(area, this);
         this._pathAreas.push(area);
     }
 
     public removePathArea(area: paper.Path){
         const index = this._pathAreas.indexOf(area);
-        if (index > -1)
+        if (index > -1){
+            Config.removePathFromLayer(index, this);
             this._pathAreas.splice(index, 1);
+        }
     }
 
     public get pathAreas(){
@@ -192,9 +196,11 @@ export class Layer {
 
     public set scaleX(scale: number){
         this._scaleX = scale;
+        Config.setScaleOfLayer([this._scaleX, this._scaleY], this);
     }
 
     public set scaleY(scale: number){
         this._scaleY = scale;
+        Config.setScaleOfLayer([this._scaleX, this._scaleY], this);
     }
 }
