@@ -66,17 +66,17 @@ export class ImportanceMapControls {
         });
 
         const positiveBrush = this._controls[1].createActionButton('\uf55d', 'btn-light', ['fas', 'fa-input', 'mt-2', 'light-border'], '', undefined, 'brushRow1-col1');
-        positiveBrush.addEventListener('click', (event) => {
+        positiveBrush.addEventListener('click', () => {
             this._brush.color = new Color(1);
         });
 
         const negativeBrush = this._controls[1].createActionButton('\uf55d', 'btn-dark', ['fas', 'fa-input', 'mt-2'], '', undefined, 'brushRow1-col1');
-        negativeBrush.addEventListener('click', (event) => {
+        negativeBrush.addEventListener('click', () => {
             this._brush.color = new Color(0);
         });
 
         const clearButton = this._controls[1].createActionButton('\uf1f8', 'btn-primary', ['fas', 'fa-input', 'mt-2'], '', undefined, 'brushRow2-col1');
-        clearButton.addEventListener('click', (event) => {
+        clearButton.addEventListener('click', () => {
             this._brush.clear();
         });
 

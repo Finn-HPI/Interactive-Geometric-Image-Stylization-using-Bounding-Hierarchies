@@ -45,9 +45,7 @@ export class GeometryControls {
     }
 
     public export(){
-        
         let canvas = document.getElementById('webgl-canvas') as HTMLCanvasElement;
-        // this._glTFBuilder.fromTree(this._svgBuilder.tree, canvas.width, canvas.height, this._renderer.getEncodedRGBImage());
         this._glTFBuilder.fromColorGroups(this._svgBuilder.colorGroups, canvas.width, canvas.height, this._renderer.getEncodedRGBImage());
     }
 

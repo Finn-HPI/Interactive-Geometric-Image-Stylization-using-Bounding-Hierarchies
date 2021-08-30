@@ -20,7 +20,6 @@ export class ClipPathViewer {
     public activateLayer(layer: Layer){
         this._scope.setup('clip-canvas');
         this._activeLayer = layer;
-        console.log(layer);
         this.showClipPath();
     }
 
@@ -80,7 +79,6 @@ export class ClipPathViewer {
 
     public handleKeys(event: KeyboardEvent){
         if(event.ctrlKey && event.key === 'z' && this._activeLayer){
-            console.log('undo');
             this._activeLayer.pathAreas.pop();
             this.showClipPath();
         }

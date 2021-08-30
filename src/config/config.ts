@@ -152,7 +152,6 @@ export class Config {
         this._layers.set(layer, [this._nextLayerNum, row, show, clip, remove]);
 
         let prev = this.getLayerWithNum(this._nextLayerNum - 1);
-        console.log('prev', prev);
         if(prev){
             layer.prevLayer = prev;
             prev.nextLayer = layer;

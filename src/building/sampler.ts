@@ -33,7 +33,7 @@ export class Sampler{
     }
 
     public generateSampleData(){
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             this.init();
                 this.gatherData();
                 this.createSamplePoints(
@@ -45,7 +45,7 @@ export class Sampler{
     }
 
     private gatherData(){
-        return new Promise((resolve, rejet) => {
+        return new Promise((resolve) => {
             this._sampleData = this._renderer.getSampleData();
             this._depthData = this._renderer.getDepthData();
             this._mattingData = this._renderer.getMattingData();
@@ -69,7 +69,6 @@ export class Sampler{
     }
 
     private createSamplePoints(width: number, height: number){
-        console.log(this._maskData, width, height);
         return new Promise((resolve, reject) => {
             let r, g, b = 0;
         for(let x = 0; x < width; x++)
@@ -108,18 +107,19 @@ export class Sampler{
     }
 
     private colorQuantizeSamplePoints(){
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             let quantize = require('quantize');
 
             const maxColorCount = Config.getValue('maxColorCount');
             let colorMap = quantize(this._colorArray, maxColorCount);
-    
             if(colorMap !== false)
                 this._samplePoints.forEach((each: DataPoint) => {
-                    each.quantizisedColor = colorArrayToColor(colorMap.map(colorToColorArray(each.color)));
+                    each.color = colorArrayToColor(colorMap.map(colorToColorArray(each.color)));
+                    each.quantizisedColor = each.color;
                 });
             else{
                 this._samplePoints.forEach((each: DataPoint) => {
+                    each.color = each.color;
                     each.quantizisedColor = each.color;
                 });
             }

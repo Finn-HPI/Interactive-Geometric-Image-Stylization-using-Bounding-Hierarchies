@@ -162,7 +162,7 @@ export class VPTree extends Tree{
         }
     }
 
-    public nodeToSVG(node: VPNode, clip: paper.PathItem, level: number, clipPath: paper.PathItem, builder: SVGBuilder): paper.PathItem | null {
+    public nodeToSVG(node: VPNode, clip: paper.PathItem, level: number, builder: SVGBuilder): paper.PathItem | null {
         if(node == null || !node.point) 
             return null;
 
@@ -187,9 +187,9 @@ export class VPTree extends Tree{
         let r: paper.PathItem | null = null;
 
         if(node.left != null && node.left.lod / 255 > level / builder.maxLevel)
-            l = this.nodeToSVG(node.left, inside, level + 1, clipPath, builder);
+            l = this.nodeToSVG(node.left, inside, level + 1, builder);
         if(node.right != null && node.right.lod / 255 > level / builder.maxLevel)
-            r = this.nodeToSVG(node.right, outside, level + 1, clipPath, builder);
+            r = this.nodeToSVG(node.right, outside, level + 1, builder);
 
         if(l == null && r == null)
             return intersect;

@@ -204,9 +204,7 @@ export class GlTFBuilder {
                 }
             });
         });
-        console.log('finish');
         this.gatherMinAndMaxInfo();
-        console.log(this);
         this.preprocessAndBuild();
     }
 
@@ -509,8 +507,6 @@ export class GlTFBuilder {
 
         this._minMaxInfo.minOffsetZ = this._offsets[2];
         this._minMaxInfo.maxOffsetZ = this._offsets[2];
-
-        console.log(this._minMaxInfo);
 
         this._indices.forEach((index: number) => {
             if(index < this._minMaxInfo.minIndex)

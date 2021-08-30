@@ -13,7 +13,7 @@ export class BlueNoise{
     protected _radius = 1;
     protected _k = 30;
     protected _pointQueue = Array<any>();
-    protected random!: () => number;
+    protected _random!: () => number;
     protected _firstPoint = true;
 
     protected _grid = {
@@ -35,12 +35,11 @@ export class BlueNoise{
         this._grid.width = Math.ceil((this._xMax - this._xMin) / this._grid.cellSize);
         this._grid.height = Math.ceil((this._yMax - this._yMin) / this._grid.cellSize);
         this._grid.data = new Array(this._grid.width * this._grid.height);
+    }
 
-        let rand = require('random-seed').create(Config.seed());
-        this.random = () => {
-            let num = rand.floatBetween(0, 1);
-            return num;
-        };
+    private setupRand(){
+        let rand = require('random-seed').create(Config.getValue('seed'));
+        this._random = () => {return rand.floatBetween(0, 1)};
     }
 
     private initializeState() {
@@ -89,16 +88,16 @@ export class BlueNoise{
         let y = 0;
         if (this._firstPoint) {
             this._firstPoint = false;
-            x = this._xMin + (this._xMax - this._xMin) * this.random();
-            y = this._yMin + (this._yMax - this._yMin) * this.random();
+            x = this._xMin + (this._xMax - this._xMin) * this._random();
+            y = this._yMin + (this._yMax - this._yMin) * this._random();
             return this.createNewPoint(x, y);
         }
         let idx = 0, distance = 0, angle = 0;
         while (this._pointQueue.length > 0) {
-            idx = (this._pointQueue.length * this.random()) | 0;
+            idx = (this._pointQueue.length * this._random()) | 0;
             for (let i = 0; i < this._k; i++) {
-                distance = this._radius * (this.random() + 1);
-                angle = 2 * Math.PI * this.random();
+                distance = this._radius * (this._random() + 1);
+                angle = 2 * Math.PI * this._random();
                 x = this._pointQueue[idx].x + distance * Math.cos(angle);
                 y = this._pointQueue[idx].y + distance * Math.sin(angle);
                 if (this.isValidPoint(x, y)) {
@@ -125,6 +124,7 @@ export class BlueNoise{
 
     public constructor(viewport: any, minDistance: number, maxTries: number){
         this.initializeParameters(viewport, minDistance, maxTries);
+        this.setupRand();
         this.initializeState();
     }
 }

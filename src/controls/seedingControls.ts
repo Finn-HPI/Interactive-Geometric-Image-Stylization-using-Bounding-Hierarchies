@@ -127,7 +127,7 @@ export class SeedingControls {
     }
 
     public updateSampling(){
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             switch(this._samplingMode){
                 case NoiseMode.SIMPLE:
                     (document.getElementById('point-canvas') as HTMLCanvasElement).style.display = 'none';
@@ -147,7 +147,7 @@ export class SeedingControls {
 
     public apply(){
         let ignore = Config.applyIgnore('seeding');
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             let paletteChanged = Config.updateValue('maxColorCount', this._maxColorCount) || ignore;
             let samplingChanged = Config.updateValues([
                 ['samplingMode', this._samplingMode],

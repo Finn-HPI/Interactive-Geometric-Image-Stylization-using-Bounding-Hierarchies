@@ -59,21 +59,18 @@ export class SVGBuilder{
     }
 
     public buildTree(){
-        let clipPath = new Path.Rectangle(new Rectangle(new Point(0, 0), new Size(this._width, this._height)));
-        
         let tree;
         switch(this._tree.constructor){
             case VPTree: tree = this._tree as VPTree;
-                tree.nodeToSVG(tree.root as VPNode, this._background, 0, clipPath, this);
-                // tree.removeDetail();
+                tree.nodeToSVG(tree.root as VPNode, this._background, 0, this);
                 break;
             case QuadTree: tree = this._tree as QuadTree;
-                tree.nodeToSVG(tree.root as QuadNode, 0, clipPath, this);
+                tree.nodeToSVG(tree.root as QuadNode, 0, this);
                 break;
             case KdTree: tree = this._tree as KdTree;
-                tree.nodeToSVG(tree.root as KdNode, new Rectangle(new Point(0,0), new Point(this._width, this._height)), 0, clipPath, this);
+                tree.nodeToSVG(tree.root as KdNode, new Rectangle(new Point(0,0), new Point(this._width, this._height)), 0, this);
         }
-        console.log('finished build');
+        console.log('finished building');
     }
 
     private clipPath(path: paper.PathItem, clipPath: paper.PathItem): paper.PathItem{
@@ -84,6 +81,7 @@ export class SVGBuilder{
         if(!this._tree || this._tree.root == null || !this._layer) 
             return;
 
+        console.log('start clipping');
         const clipPath = this._layer.generateClipPath(this._width, this._height)[0];
 
         this._tree.allTreeNodes(this._tree.root).forEach((each: any) => {
@@ -100,6 +98,7 @@ export class SVGBuilder{
                     this.exportToSvg(each.path, each, false);
             }
         });
+        console.log('clipping finished');
     }
 
     public exportToSvg(item: any, node: any, child: boolean){

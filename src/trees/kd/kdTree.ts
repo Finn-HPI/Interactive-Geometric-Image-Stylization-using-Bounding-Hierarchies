@@ -1,5 +1,6 @@
 import { Path, Point, Rectangle } from "paper/dist/paper-core";
 import { SVGBuilder } from "../../building/builder/svgBuilder";
+import { select } from "../../utils/vpUtil";
 import { DataPoint } from "../dataPoint";
 import { ColorMode, Tree } from "../tree";
 import { KdNode } from "./kdNode";
@@ -12,19 +13,79 @@ export class KdTree extends Tree{
         this.setupRand();
         this._colorMode = colorMode;
 
-        points = points.sort((a, b) => 0.5 - this.random());
-        let startPoint = points[Math.floor(points.length / 2)];
+        let startPoint = select(points, Math.floor(points.length / 2), undefined, undefined, this.xCompare);
         this._root = this.insert(this._root, startPoint);
+
+        let left = new Array<DataPoint>();
+        let right = new Array<DataPoint>();
 
         points.forEach((point: DataPoint) => {
             if(point !== startPoint)
-                this._root = this.insert(this._root, point);
+                if(this.compare(point, startPoint, true))
+                    left.push(point);
+                else
+                    right.push(point);
         });
 
         if(this._root){
+            this.buildRecursive(this._root, left, right, false);
             this.gatherSubPoints(this._root);
             this.meanData(this._root);
         }
+    }
+
+    public buildRecursive(root: KdNode, left: Array<DataPoint>, right: Array<DataPoint>, compareX = true){
+        if(left.length > 0){
+            let lM = select(left, Math.floor(left.length / 2), undefined, undefined, (a: DataPoint, b: DataPoint) => {
+                return this.compare(a, b, compareX);
+            });
+            this.insert(root, lM);
+
+            let left2 = new Array<DataPoint>();
+            let right2 = new Array<DataPoint>();
+
+            left.forEach((point: DataPoint) => {
+                if(point !== lM)
+                    if(this.compare(point, lM, compareX))
+                        left2.push(point);
+                    else
+                        right2.push(point);
+            });
+            
+            this.buildRecursive(root, left2, right2, !compareX);
+        }
+
+        if(right.length > 0){
+            let rM = select(right, Math.floor(right.length / 2), undefined, undefined, (a: DataPoint, b: DataPoint) => {
+                return this.compare(a, b, compareX);
+            });
+            this.insert(root, rM);
+
+            let left2 = new Array<DataPoint>();
+            let right2 = new Array<DataPoint>();
+
+            right.forEach((point: DataPoint) => {
+                if(point !== rM)
+                    if(this.compare(point, rM, compareX))
+                        left2.push(point);
+                    else
+                        right2.push(point);
+            });
+            
+            this.buildRecursive(root, left2, right2, !compareX);
+        }
+    }
+
+    public compare(a: DataPoint, b: DataPoint, compareX: boolean){
+        return compareX? this.xCompare(a, b) : this.yCompare(a, b);
+    }
+
+    public xCompare(a: DataPoint, b: DataPoint): number{
+        return a.x < b.x ? -1 : a.x > b.x ? 1 : 0;
+    }
+
+    public yCompare(a: DataPoint, b: DataPoint): number{
+        return a.y < b.y ? -1 : a.y > b.y ? 1 : 0;
     }
 
     public insert(root: KdNode | null, point: DataPoint, level: number = 0): KdNode | null{
@@ -95,7 +156,7 @@ export class KdTree extends Tree{
             this.traverse(node.right, nodes);
     }
 
-    public nodeToSVG(node: KdNode, area: paper.Rectangle, level: number, clipPath: paper.PathItem, builder: SVGBuilder){
+    public nodeToSVG(node: KdNode, area: paper.Rectangle, level: number, builder: SVGBuilder){
         if(node == null || node.point == null)
             return;
             
@@ -110,11 +171,11 @@ export class KdTree extends Tree{
         let l = false, r = false;
         let rect;
         if(node.left != null && level * 255 / builder.maxLevel < node.left.lod)
-            this.nodeToSVG(node.left, left, level + 1, clipPath, builder);
+            this.nodeToSVG(node.left, left, level + 1, builder);
         else
             l = true;
         if(node.right != null && level * 255 / builder.maxLevel < node.right.lod)
-            this.nodeToSVG(node.right, right,level + 1, clipPath, builder);
+            this.nodeToSVG(node.right, right,level + 1, builder);
         else    
             r = true;
 

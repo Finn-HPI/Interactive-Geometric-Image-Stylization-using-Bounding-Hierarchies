@@ -167,14 +167,14 @@ export class LayerControls {
     }
 
     public applySettings(){
-        return new Promise((resolve, reject) => {
-            this._inputControls.apply().then((res) => {
+        return new Promise((resolve) => {
+            this._inputControls.apply().then(() => {
                     setTimeout(() => {
                         this._importanceControls.apply();
-                        this._seedingControls.apply().then((res2) => {
+                        this._seedingControls.apply().then(() => {
                             Config.setApplyIgnore('seeding', true);
                             Config.setApplyIgnore('importance', true);
-                            this._sampler.generateSampleData().then((res) => {
+                            this._sampler.generateSampleData().then(() => {
                                 resolve('applied');
                             });
                         });
@@ -210,7 +210,7 @@ export class LayerControls {
 
         
         if(Config.needsRefresh){
-            this._sampler.generateSampleData().then((res) => {
+            this._sampler.generateSampleData().then(() => {
                 Config.needsRefresh = false;
                 layer.points = this._sampler.samplePoints;
                 Config.addLayer(layer, row, showButton, clipButton, removeButton, addToConfig);
@@ -233,7 +233,6 @@ export class LayerControls {
 
     public refreshExistingLayers(){
         if(Config.layers.size == 0) return;
-        
         this._sampler.generateSampleData();
         Config.layers.forEach((item: [number, HTMLElement, HTMLButtonElement, HTMLButtonElement, HTMLButtonElement], key: Layer) => {
             key.points = this._sampler.samplePoints;
