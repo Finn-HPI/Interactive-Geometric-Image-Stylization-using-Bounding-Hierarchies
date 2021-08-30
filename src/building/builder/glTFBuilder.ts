@@ -7,6 +7,8 @@ import { getColorFromHex } from "../../utils/colorUtil";
 
 export class GlTFBuilder {
 
+    protected _encodedUri!: string;
+
     protected ARRAY_BUFFER = 34962;
     protected ELEMENT_ARRAY_BUFFER = 34963;
     protected FLOAT = 5126;
@@ -456,10 +458,7 @@ export class GlTFBuilder {
                 version: '2.0'
             }
         };
-        let link = document.createElement("a");
-        link.download = 'test.gltf';
-        link.href = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(gltf, null, 2));
-        link.click();
+        this._encodedUri = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(gltf, null, 2));
     }
 
     private gatherMinAndMaxInfo(){
@@ -583,5 +582,9 @@ export class GlTFBuilder {
             if(this._texCoords[i+1] > this._minMaxInfo.maxUVY)
                 this._minMaxInfo.maxUVY = this._texCoords[i+1];
         }
+    }
+
+    public get encodedUri(){
+        return this._encodedUri;
     }
 }

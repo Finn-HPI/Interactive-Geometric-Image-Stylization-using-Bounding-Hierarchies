@@ -78,7 +78,7 @@ export class Application {
         seedingControls.layerControls = layerControls;
         seedingControls.setup();
     
-        let geometryControls = new GeometryControls('gltf-container', 'geometry-export-container');
+        let geometryControls = new GeometryControls('gltf-container', 'gltf-gen-container', 'gltf-import-container');
         geometryControls.glTFBuilder = glTFBuilder;
         geometryControls.renderer = this._renderer;
         geometryControls.svgBuilder = svgBuilder;

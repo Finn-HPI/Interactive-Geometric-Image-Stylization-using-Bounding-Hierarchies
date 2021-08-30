@@ -175,6 +175,7 @@ export class LayerControls {
                             Config.setApplyIgnore('seeding', true);
                             Config.setApplyIgnore('importance', true);
                             this._sampler.generateSampleData().then(() => {
+                                if(Config.needsRefresh) Config.needsRefresh = false;
                                 resolve('applied');
                             });
                         });
@@ -208,7 +209,6 @@ export class LayerControls {
         layer.scaleX = scaling[0];
         layer.scaleY = scaling[1];
 
-        
         if(Config.needsRefresh){
             this._sampler.generateSampleData().then(() => {
                 Config.needsRefresh = false;

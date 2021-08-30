@@ -56,6 +56,7 @@ module.exports = {
             patterns: [
                 { from: 'src/views/css', to: 'css'},
                 { from: 'src/views/img', to: 'img'},
+                { from: 'src/views/models', to: 'models'},
             ]
         })
     ],
