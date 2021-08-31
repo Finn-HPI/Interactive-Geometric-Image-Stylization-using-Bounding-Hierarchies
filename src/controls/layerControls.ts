@@ -9,7 +9,7 @@ import { InputControls } from "./inputControls";
 import { ImportanceMapControls } from "./importanceMapControls";
 import { SeedingControls } from "./seedingControls";
 import { ClipPathViewer } from "../building/layer/clipPathViewer";
-import { Path, Point } from "paper/dist/paper-core";
+import { Point } from "paper/dist/paper-core";
 
 export enum DataStructure {
     VP, QUAD, KD
@@ -242,7 +242,7 @@ export class LayerControls {
     }
 
     public acitvateScope(){
-        this._clipViewer.setup();
+        this._clipViewer.acitvate();
     }
 
     public set layerViewer(viewer: LayerViewer){

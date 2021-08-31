@@ -20,7 +20,7 @@ export enum ColorMode{
 }
 export class VectorControls {
 
-    protected _controls!: [Controls, Controls, Controls, Controls];
+    protected _controls!: [Controls, Controls, Controls];
     protected _svgBuilder!: SVGBuilder;
     protected _renderer!: ImageRenderer;
 
@@ -37,8 +37,8 @@ export class VectorControls {
         ['Image', ColorMode.IMAGE]
     ]);
 
-    public constructor(id: string, id2: string, id3: string, id4: string){
-        this._controls = [new Controls(id), new Controls(id2, 0.5, 'webgl-canvas'), new Controls(id3), new Controls(id4)];
+    public constructor(id: string, id2: string, id3: string){
+        this._controls = [new Controls(id), new Controls(id2, 0.5, 'webgl-canvas'), new Controls(id3)];
     }
 
     public setup(){
@@ -49,11 +49,6 @@ export class VectorControls {
         const exportSVGButton = this._controls[0].createActionButton('Export SVG', 'btn-warning');
         exportSVGButton.addEventListener('click', () => {
             this.exportSVG();
-        });
-
-        const exportTemplateButton = this._controls[3].createActionButton('Export Template', 'btn-warning');
-        exportTemplateButton.addEventListener('click', () => {
-            this.exportTemplate();
         });
 
         this.initAppearanceSettings();
@@ -151,20 +146,7 @@ export class VectorControls {
         link.href = url;
         link.click();
     }
-
-    private exportTemplate(){
-        this._svgBuilder.applyAppearanceSettings({
-            border0: 1,
-            border1: 1,
-            borderMode: BorderMode.FILL_AND_BORDER,
-            colorMode: ColorMode.WHITE,
-            color0: '#000000',
-            color1: '#000000'
-        });
-        this._svgBuilder.buildColoringTemplate();
-        this._svgBuilder.applyAppearanceSettings();
-    }
-
+    
     public createTree(type: DataStructure){
         switch(type){
             case DataStructure.VP:

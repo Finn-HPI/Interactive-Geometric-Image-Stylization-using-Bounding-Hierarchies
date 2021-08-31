@@ -178,12 +178,11 @@ export class Layer {
         this._pathAreas.push(area);
     }
 
-    public removePathArea(area: paper.Path){
-        const index = this._pathAreas.indexOf(area);
-        if (index > -1){
-            Config.removePathFromLayer(index, this);
-            this._pathAreas.splice(index, 1);
-        }
+    public removeLastPath(){
+        let last = this._pathAreas.pop()
+        if(last)
+            Config.removePathFromLayer(this);
+        
     }
 
     public get pathAreas(){

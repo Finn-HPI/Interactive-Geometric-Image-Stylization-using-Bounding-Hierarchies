@@ -4,6 +4,7 @@ import { SVGBuilder } from "./building/builder/svgBuilder";
 import { ClipPathViewer } from "./building/layer/clipPathViewer";
 import { LayerViewer } from "./building/layer/layerViewer";
 import { Config } from "./config/config";
+import { ColoringBookControls } from "./controls/coloringBookControls";
 import { GeneralControls } from "./controls/generalControls";
 import { GeometryControls } from "./controls/geometryControls";
 import { GlobalControls } from "./controls/globalControls";
@@ -87,12 +88,15 @@ export class Application {
         let vectorControls = new VectorControls(
             'svg-gen-container', 
             'appearance-container', 
-            'appearance-apply-container', 
-            'colBook-container'
+            'appearance-apply-container'
         );
         vectorControls.renderer = this._renderer;
         vectorControls.svgBuilder = svgBuilder;
         vectorControls.setup();
+
+        let coloringBookControls = new ColoringBookControls('colBook-container');
+        coloringBookControls.svgBuilder = svgBuilder;
+        coloringBookControls.setup();
 
         inputControls.layerControls = layerControls;
         
@@ -104,26 +108,6 @@ export class Application {
         globalControls.setup();
         
         Config.applyConfig();
-    }    
-
-    public changePage(hashKey: string){
-        switch(hashKey){
-            case '':
-                break;
-            case '#vector':
-                break;
-            case '#3d':
-                break;
-            case '#input':
-                break;
-            case '#importance-map':
-                break;
-            case '#layer':
-                break;
-            case '#sampling':
-                break;
-            default:
-        }
     }
 }
 

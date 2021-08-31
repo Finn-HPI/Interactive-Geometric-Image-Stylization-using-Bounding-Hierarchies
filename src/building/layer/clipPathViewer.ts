@@ -18,13 +18,15 @@ export class ClipPathViewer {
     }
 
     public activateLayer(layer: Layer){
-        this.setup() 
+        this._scope.setup('clip-canvas');
+        this._scope.activate();
         this._activeLayer = layer;
         this.showClipPath();
     }
 
-    public setup(){
+    public acitvate(){
         this._scope.setup('clip-canvas');
+        this._scope.activate();
     }
 
     public showClipPath(){
@@ -83,7 +85,7 @@ export class ClipPathViewer {
 
     public handleKeys(event: KeyboardEvent){
         if(event.ctrlKey && event.key === 'z' && this._activeLayer){
-            this._activeLayer.pathAreas.pop();
+            this._activeLayer.removeLastPath();
             this.showClipPath();
         }
     }

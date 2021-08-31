@@ -73,11 +73,16 @@ function render(hashKey) {
             tabs[4].style.backgroundColor = selected;
             break;
         case '#3d':
-                gltfCanvas.style.display = 'block';
-                gltfBackCanvas.style.display = 'block';
-                pages[5].style.display = 'block';
-                tabs[5].style.backgroundColor = selected;
-                break;
+            gltfCanvas.style.display = 'block';
+            gltfBackCanvas.style.display = 'block';
+            pages[5].style.display = 'block';
+            tabs[5].style.backgroundColor = selected;
+            break;
+        case '#coloring-book':
+            svgCanvas.style.display = 'block';
+            pages[6].style.display = 'block';
+            tabs[6].style.backgroundColor = selected;
+            break;
         default:
             pages[0].style.display = 'block';
             tabs[0].style.backgroundColor = selected;

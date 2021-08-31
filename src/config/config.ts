@@ -85,9 +85,8 @@ export class Config {
                         stringToColorMode(item.color)
                     );
                     this._layerControls.createLayer(layer, false, false);
-                    
-                    this._layerControls.acitvateScope();
                     item.paths.forEach((pathData: string) => {
+                        this._layerControls.acitvateScope();
                         layer.addPathArea(new Path(pathData), false);
                     });
 
@@ -254,10 +253,10 @@ export class Config {
             layerI.paths.push(area.pathData);
     }
 
-    static removePathFromLayer(pathIndex: number, layer: Layer){
+    static removePathFromLayer(layer: Layer){
         let layerI = this.getLayerItem(layer);
         if(layerI)
-            layerI.paths.splice(pathIndex, 1);
+            layerI.paths.pop();
     }
 
     static getLayerItem(layer: Layer){
