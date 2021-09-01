@@ -89,11 +89,8 @@ export class Config {
 
                 this._config.layers.forEach((item: LayerItem) => {
                     let layer = this.getLayerWithNum(item.num) as Layer;
-
-                    //activate layer
-                    let infoObj = this._layers.get(layer) as [number, HTMLElement, HTMLButtonElement, HTMLButtonElement, HTMLButtonElement];
-                    infoObj[3].click();
-
+                    this._layerControls.activateLayer(layer, true);
+                  
                     item.paths.forEach((pathData: string) => {
                         layer.addPathArea(new Path(pathData), true);
                     });

@@ -212,7 +212,7 @@ export class LayerControls {
             Config.removeLayer(layer);
         });
 
-        this._clipViewer.activateLayer(layer, false);
+        this._clipViewer.activateLayer(layer);
         const scaling = this._clipViewer.getScaling();
         layer.scaleX = scaling[0];
         layer.scaleY = scaling[1];
