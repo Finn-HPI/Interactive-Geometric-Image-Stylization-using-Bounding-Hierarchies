@@ -260,18 +260,15 @@ export class ImportanceMapControls {
             this.getCurrentValueItem('normaly'),
             this.getCurrentValueItem('normalz')
         ]) || ignore;
-        console.log(changed);
 
         if(changed){
             this._settings.forEach((value: [number, number, HTMLInputElement, HTMLInputElement]) => {
                 this._renderer.updateConfiguration(value[0], value[1]);
             });
-            
             Config.setApplyIgnore('importance');
             this._layerControls.refreshExistingLayers();
-
-            this._renderer.showLodMask();
         }
+        this._renderer.showLodMask();
     }
 
     public set layerControls(controls: LayerControls){

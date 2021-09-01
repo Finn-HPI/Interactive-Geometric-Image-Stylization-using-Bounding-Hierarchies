@@ -182,7 +182,6 @@ export class Layer {
         let last = this._pathAreas.pop()
         if(last)
             Config.removePathFromLayer(this);
-        
     }
 
     public get pathAreas(){
@@ -193,13 +192,11 @@ export class Layer {
         this._pathAreas = new Array<paper.Path>();
     }
 
-    public set scaleX(scale: number){
-        this._scaleX = scale;
-        Config.setScaleOfLayer([this._scaleX, this._scaleY], this);
+    public set scaleX(x: number){
+        this._scaleX = x;
     }
 
-    public set scaleY(scale: number){
-        this._scaleY = scale;
-        Config.setScaleOfLayer([this._scaleX, this._scaleY], this);
+    public set scaleY(y: number){
+        this._scaleY = y;
     }
 }

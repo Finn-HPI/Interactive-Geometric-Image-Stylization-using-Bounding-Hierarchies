@@ -135,7 +135,6 @@ export class VectorControls {
         });
         this._svgBuilder.applyAppearanceSettings();
         this._svgBuilder.display();
-        setProgress(0);
     }
 
 

@@ -9,6 +9,7 @@ import { VPNode } from "../../trees/vp/vpNode";
 import { VPTree } from "../../trees/vp/vpTree";
 import { colorToGrayScale, colorToHex, getColorFromHex } from "../../utils/colorUtil";
 import { colorLerp, lerp } from "../../utils/lerp";
+import { svgPathToPolygons } from "../../utils/svgUtils";
 import { Layer } from "../layer/layer";
 export class SVGBuilder{
 
@@ -156,7 +157,7 @@ export class SVGBuilder{
         let svg = '';
         this._colorGroups.forEach((parts: Array<string>, color: string) => {
             if(parts.length > 0){
-                svg += '<g ' + color + ' shape-rendering="geometricPrecision">\n';
+                svg += '<g ' + color + ' shape-rendering="crispEdges">\n';
                 parts.forEach((part: string) => {
                     let path_string = part;
                     svg += path_string;
@@ -281,7 +282,6 @@ export class SVGBuilder{
     }
 
     public buildColoringTemplate(){
-        const { pathDataToPolys } = require('svg-path-to-polygons');
         this._scope = new PaperScope();
         this._scope.setup(new Size(this._width, this._height));
         this._scope.activate();
@@ -289,7 +289,7 @@ export class SVGBuilder{
         let items = new Map<paper.PointText, paper.PathItem>();
         let descriptions = new Array<paper.PointText>();
 
-        let maxRecursionDepth = Config.getValue('maxRecursionDepth');
+        let maxRecursionDepth = Config.getValue('maxRecursionDepth') as number;
 
 
         let index = 0;
@@ -326,7 +326,7 @@ export class SVGBuilder{
                 if(pathRegex && idRegex){
                     let path = PathItem.create(pathRegex[1]);
                     
-                    let poly = pathDataToPolys(pathRegex[1], maxRecursionDepth, {tolerance:1, decimals:1});
+                    let poly = svgPathToPolygons(pathRegex[1], maxRecursionDepth , {tolerance:1, decimals:1});
 
                     if(path.area > 5){
                         let point = new Point(this.centroid(poly[0]));

@@ -18,8 +18,7 @@ interface LayerItem {
     to: number,
     maxLevel: number,
     minArea: number,
-    paths: string[],
-    scaling: [number, number]
+    paths: string[]
 }
 
 interface ConfigFormat{
@@ -72,8 +71,9 @@ export class Config {
         this._layers = new Map<Layer, [number, HTMLElement, HTMLButtonElement, HTMLButtonElement, HTMLButtonElement]>();
         
         if(this._config.layers.length > 0){
-            this._layerControls.applySettings().then((res) => {
+            this._layerControls.applySettings().then(() => {
                 Config.needsRefresh = false;
+               
                 this._config.layers.forEach((item: LayerItem) => {
                     let layer = new Layer(
                         stringToDataStructure(item.tree),
@@ -85,13 +85,18 @@ export class Config {
                         stringToColorMode(item.color)
                     );
                     this._layerControls.createLayer(layer, false, false);
-                    item.paths.forEach((pathData: string) => {
-                        this._layerControls.acitvateScope();
-                        layer.addPathArea(new Path(pathData), false);
-                    });
+                });
 
-                    layer.scaleX = item.scaling[0];
-                    layer.scaleY = item.scaling[1];
+                this._config.layers.forEach((item: LayerItem) => {
+                    let layer = this.getLayerWithNum(item.num) as Layer;
+
+                    //activate layer
+                    let infoObj = this._layers.get(layer) as [number, HTMLElement, HTMLButtonElement, HTMLButtonElement, HTMLButtonElement];
+                    infoObj[3].click();
+
+                    item.paths.forEach((pathData: string) => {
+                        layer.addPathArea(new Path(pathData), true);
+                    });
                 });
             });
         }
@@ -177,8 +182,7 @@ export class Config {
                 to: layer.to,
                 maxLevel: layer.maxLevel,
                 minArea: layer.minArea,
-                paths: [],
-                scaling: [1,1]
+                paths: []
             });
         this._nextLayerNum++;
     }
@@ -239,12 +243,6 @@ export class Config {
 
     static getHtmlElement(name: string){
         return this._htmlElements.get(name);
-    }
-
-    static setScaleOfLayer(scaling: [number, number], layer: Layer){
-        let layerI = this.getLayerItem(layer);
-        if(layerI)
-            layerI.scaling = scaling;
     }
 
     static addPathToLayer(area: paper.Path, layer: Layer){

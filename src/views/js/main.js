@@ -6,7 +6,6 @@ function onDOMLoaded(){
 
     window.onhashchange = function(){
         render(window.location.hash);
-        app.changePage(window.location.hash);
     };
     
     render('#vector');

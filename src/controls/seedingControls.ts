@@ -160,7 +160,7 @@ export class SeedingControls {
             Config.setApplyIgnore('seeding');
 
             if(samplingChanged)
-                this.updateSampling().then((res) => {resolve('finished')});
+                this.updateSampling().then(() => {resolve('finished')});
 
             if(samplingChanged || paletteChanged){
                 this._layerControls.refreshExistingLayers();

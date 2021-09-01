@@ -17,11 +17,11 @@ export class ClipPathViewer {
         this._scope = new PaperScope();
     }
 
-    public activateLayer(layer: Layer){
+    public activateLayer(layer: Layer, show = true){
         this._scope.setup('clip-canvas');
         this._scope.activate();
         this._activeLayer = layer;
-        this.showClipPath();
+        if(show) this.showClipPath();
     }
 
     public acitvate(){
@@ -103,7 +103,6 @@ export class ClipPathViewer {
     }
 
     public getScaling(){
-        this._scope.activate();
         const xScale = this._canvasSize[0] / this._scope.view.viewSize.width;
         const yScale = this._canvasSize[1]  /this._scope.view.viewSize.height;
         return [xScale, yScale];

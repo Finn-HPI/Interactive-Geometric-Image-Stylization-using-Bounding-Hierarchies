@@ -10,6 +10,7 @@ import { ImportanceMapControls } from "./importanceMapControls";
 import { SeedingControls } from "./seedingControls";
 import { ClipPathViewer } from "../building/layer/clipPathViewer";
 import { Point } from "paper/dist/paper-core";
+import { setProgress } from "../global/progressbar";
 
 export enum DataStructure {
     VP, QUAD, KD
@@ -167,25 +168,31 @@ export class LayerControls {
     }
 
     public applySettings(){
+        setProgress(0);
         return new Promise((resolve) => {
             this._inputControls.apply().then(() => {
-                    setTimeout(() => {
-                        this._importanceControls.apply();
-                        this._seedingControls.apply().then(() => {
-                            Config.setApplyIgnore('seeding', true);
-                            Config.setApplyIgnore('importance', true);
-                            this._sampler.generateSampleData().then(() => {
-                                if(Config.needsRefresh) Config.needsRefresh = false;
-                                resolve('applied');
-                            });
+                setTimeout(() => {
+                    this._importanceControls.apply();
+                    setProgress(0.2);
+                    this._seedingControls.apply().then(() => {
+                        Config.setApplyIgnore('seeding', true);
+                        Config.setApplyIgnore('importance', true);
+                        setProgress(0.6);
+                        this._sampler.generateSampleData().then(() => {
+                            if(Config.needsRefresh) Config.needsRefresh = false;
+                            setProgress(1);
+                            setProgress(0);
+                            resolve('applied');
                         });
-                    }, 2000);
+                    });
+                }, 2000);
             });
         });
     }
 
     public finalizeLayer(layer: Layer, addToConfig = true){
         const id = uuid();
+        console.log('finalize')
         const row = this._controls[0].createRow3Cols(id, 'col-8', 'col-2', 'col-2', 'pr-0', 'pr-0 pl-0', 'pl-0');
         const showButton = this._controls[0].createActionButton(layer.toString(), 'btn-secondary', ['mb-1', 'tlbl'], undefined, undefined, id + '-col1');
 
@@ -205,7 +212,7 @@ export class LayerControls {
             Config.removeLayer(layer);
         });
 
-        this.acitvateScope();
+        this._clipViewer.activateLayer(layer, false);
         const scaling = this._clipViewer.getScaling();
         layer.scaleX = scaling[0];
         layer.scaleY = scaling[1];
@@ -223,6 +230,7 @@ export class LayerControls {
     }
 
     public createLayer(layer: Layer, addToConfig = true, apply = true){
+        console.log('create');
         if(apply)
             this.applySettings()
             .then((res) => {
@@ -241,7 +249,11 @@ export class LayerControls {
         Config.needsRefresh = false;
     }
 
-    public acitvateScope(){
+    public activateLayer(layer: Layer, show = true){
+        this._clipViewer.activateLayer(layer, show)
+    }
+
+    public activateScope(){
         this._clipViewer.acitvate();
     }
 

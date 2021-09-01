@@ -83,27 +83,24 @@ export class InputControls {
         let ignore = Config.applyIgnore('input');
 
         let imageChanged = Config.updateValue('image', this._imageSelection) || ignore;
-        let layerChanged = Config.updateValue('layer', this._layerMode) || ignore;
+        Config.updateValue('layer', this._layerMode);
         
         Config.setApplyIgnore('input');
         let promise = new Promise((resolve) => {
             if(imageChanged){
                 this._renderer.loadImages(this._image)
-                .then((res) => {
-                    if(layerChanged){
-                        this._renderer.layerMode = this._layerMode;
-                        this._renderer.mode = Mode.NORMAL;
-                        this._renderer.updateChange();
-                    }
+                .then(() => {
+                    this._renderer.layerMode = this._layerMode;
+                    this._renderer.mode = Mode.NORMAL;
+                    this._renderer.updateChange();
+                    
                     this._layerControls.refreshExistingLayers();
                     resolve('loaded');
                 });
             }else{
-                if(layerChanged){
-                    this._renderer.layerMode = this._layerMode;
-                    this._renderer.mode = Mode.NORMAL;
-                    this._renderer.updateChange();
-                }
+                this._renderer.layerMode = this._layerMode;
+                this._renderer.mode = Mode.NORMAL;
+                this._renderer.updateChange();
                 resolve('loaded 2');
             }
         });

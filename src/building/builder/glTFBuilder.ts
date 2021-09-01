@@ -4,6 +4,7 @@ import { ExportMode } from "../../controls/geometryControls";
 import { TreeNode } from "../../trees/node";
 import { bytesToBase64 } from "../../utils/base64";
 import { getColorFromHex } from "../../utils/colorUtil";
+import { svgPathToPolygons } from "../../utils/svgUtils";
 
 export class GlTFBuilder {
 
@@ -49,10 +50,10 @@ export class GlTFBuilder {
     };
 
     public constructor(){
-        this.init();
+        this.cleanSetup();
     }
 
-    private init(){
+    private cleanSetup(){
         this._lastIndex = 0;
         this._vertices = new Array<number>();
         this._indices = new Array<number>();
@@ -129,12 +130,11 @@ export class GlTFBuilder {
 
     private async triangulatePath(path: string, pathDepth: number, color: paper.Color){
         const earcut = require('earcut');
-        const { pathDataToPolys } = require('svg-path-to-polygons');
         
         let poly = new Array<number>();
-        let maxRecursionDepth = Config.getValue('maxRecursionDepth');
+        let maxRecursionDepth = Config.getValue('maxRecursionDepth') as number;
 
-        let points = pathDataToPolys(path, maxRecursionDepth, {tolerance:1, decimals:1});
+        let points = svgPathToPolygons(path, maxRecursionDepth, {tolerance:1, decimals:1});
         points[0].forEach((item: [number, number]) => {
             let point = this.normalizePoint(item[0], item[1], this._width, this._height);
             poly.push(point[0], point[1]);
@@ -179,7 +179,6 @@ export class GlTFBuilder {
     }
 
     public fromColorGroups(groups: Map<string, Array<string>>, width: number, height: number, encoded_image: string){
-        this.init();
         this._encodedImage = encoded_image;
         this._width = width;
         this._height = height;
@@ -208,6 +207,7 @@ export class GlTFBuilder {
         });
         this.gatherMinAndMaxInfo();
         this.preprocessAndBuild();
+        this.cleanSetup();
     }
 
     public normalizePoint(x: number, y: number, width: number, height: number){
