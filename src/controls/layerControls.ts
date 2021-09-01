@@ -192,7 +192,6 @@ export class LayerControls {
 
     public finalizeLayer(layer: Layer, addToConfig = true){
         const id = uuid();
-        console.log('finalize')
         const row = this._controls[0].createRow3Cols(id, 'col-8', 'col-2', 'col-2', 'pr-0', 'pr-0 pl-0', 'pl-0');
         const showButton = this._controls[0].createActionButton(layer.toString(), 'btn-secondary', ['mb-1', 'tlbl'], undefined, undefined, id + '-col1');
 
@@ -230,7 +229,6 @@ export class LayerControls {
     }
 
     public createLayer(layer: Layer, addToConfig = true, apply = true){
-        console.log('create');
         if(apply)
             this.applySettings()
             .then((res) => {
