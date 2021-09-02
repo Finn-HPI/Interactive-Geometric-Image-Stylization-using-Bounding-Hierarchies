@@ -74,6 +74,9 @@ export class Config {
             this._layerControls.applySettings().then(() => {
                 Config.needsRefresh = false;
                
+                let viewCanvas = document.getElementById('clip-canvas') as HTMLCanvasElement;
+                const oldDisplay = viewCanvas.style.display;
+                viewCanvas.style.display = 'block';
                 this._config.layers.forEach((item: LayerItem) => {
                     let layer = new Layer(
                         stringToDataStructure(item.tree),
@@ -88,13 +91,16 @@ export class Config {
                 });
 
                 this._config.layers.forEach((item: LayerItem) => {
-                    let layer = this.getLayerWithNum(item.num) as Layer;
-                    this._layerControls.activateLayer(layer, true);
-                  
-                    item.paths.forEach((pathData: string) => {
-                        layer.addPathArea(new Path(pathData), true);
-                    });
+                    if(item.paths.length > 0){
+                        let layer = this.getLayerWithNum(item.num) as Layer;
+                        this._layerControls.activateLayer(layer, true);
+                        
+                        item.paths.forEach((pathData: string) => {
+                            layer.addPathArea(new Path(pathData), true);
+                        });
+                    }
                 });
+                viewCanvas.style.display = oldDisplay;
             });
         }
     }
