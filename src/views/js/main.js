@@ -82,6 +82,10 @@ function render(hashKey) {
             pages[6].style.display = 'block';
             tabs[6].style.backgroundColor = selected;
             break;
+        case '#arctic-core':
+            pages[7].style.display = 'block';
+            tabs[7].style.backgroundColor = selected;
+            break;
         default:
             pages[0].style.display = 'block';
             tabs[0].style.backgroundColor = selected;

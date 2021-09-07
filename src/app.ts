@@ -4,6 +4,7 @@ import { SVGBuilder } from "./building/builder/svgBuilder";
 import { ClipPathViewer } from "./building/layer/clipPathViewer";
 import { LayerViewer } from "./building/layer/layerViewer";
 import { Config } from "./config/config";
+import { ArcticControls } from "./controls/arcticControls";
 import { ColoringBookControls } from "./controls/coloringBookControls";
 import { GeneralControls } from "./controls/generalControls";
 import { GeometryControls } from "./controls/geometryControls";
@@ -26,7 +27,7 @@ export class Application {
 
     public startApplication() {
     
-        let canvas = new Canvas('webgl-canvas', {preserveDrawingBuffer: true});
+        const canvas = new Canvas('webgl-canvas', {preserveDrawingBuffer: true});
         this._renderer = new ImageRenderer;
         canvas.renderer = this._renderer;
 
@@ -39,15 +40,15 @@ export class Application {
         this._clipPathViewer = new ClipPathViewer(this._renderer.canvasSize);
         this._layerViewer = new LayerViewer(this._renderer.canvasSize);
 
-        let generalControls = new GeneralControls('open-button', 'import-button', 'export-button');
+        const generalControls = new GeneralControls('open-button', 'import-button', 'export-button');
         generalControls.setup();
 
-        let inputControls = new InputControls('input-container', 'input-apply-container');
+        const inputControls = new InputControls('input-container', 'input-apply-container');
         inputControls.renderer = this._renderer;
         inputControls.setup();
 
 
-        let layerControls = new LayerControls(
+        const layerControls = new LayerControls(
             'layer-container', 
             'layer-new-container',
             'layer-add-container',
@@ -59,7 +60,7 @@ export class Application {
         layerControls.setup();
         Config.layerControls = layerControls;
 
-        let importanceMapControls = new ImportanceMapControls(
+        const importanceMapControls = new ImportanceMapControls(
             'global-importance-container', 
             'local-importance-container',
             'importance-apply-container'
@@ -68,7 +69,7 @@ export class Application {
         importanceMapControls.layerControls = layerControls;
         importanceMapControls.setup();
     
-        let seedingControls = new SeedingControls(
+        const seedingControls = new SeedingControls(
             'sampling-container', 
             'color-container',
             'seed-container',
@@ -79,13 +80,13 @@ export class Application {
         seedingControls.layerControls = layerControls;
         seedingControls.setup();
     
-        let geometryControls = new GeometryControls('gltf-container', 'gltf-gen-container', 'gltf-import-container');
+        const geometryControls = new GeometryControls('gltf-container', 'gltf-gen-container', 'gltf-import-container');
         geometryControls.glTFBuilder = glTFBuilder;
         geometryControls.renderer = this._renderer;
         geometryControls.svgBuilder = svgBuilder;
         geometryControls.setup();
     
-        let vectorControls = new VectorControls(
+        const vectorControls = new VectorControls(
             'svg-gen-container', 
             'appearance-container', 
             'appearance-apply-container'
@@ -94,7 +95,7 @@ export class Application {
         vectorControls.svgBuilder = svgBuilder;
         vectorControls.setup();
 
-        let coloringBookControls = new ColoringBookControls('colBook-container');
+        const coloringBookControls = new ColoringBookControls('colBook-container');
         coloringBookControls.svgBuilder = svgBuilder;
         coloringBookControls.setup();
 
@@ -104,8 +105,11 @@ export class Application {
         layerControls.importanceControls = importanceMapControls;
         layerControls.seedingControls = seedingControls;
 
-        let globalControls = new GlobalControls('global-container');
+        const globalControls = new GlobalControls('global-container');
         globalControls.setup();
+
+        const arcitcControls = new ArcticControls('svg2img-container', 'effect-container', 'arctic-apply-container');
+        arcitcControls.setup();
         
         Config.applyConfig();
     }

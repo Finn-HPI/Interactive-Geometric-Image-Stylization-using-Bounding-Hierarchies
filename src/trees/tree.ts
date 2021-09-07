@@ -22,6 +22,7 @@ export abstract class Tree {
     public setupRand(){
         let rand = require('random-seed').create(Config.getValue('seed'));
         this._random = () => {return rand.floatBetween(0, 1)};
+        console.log(Config.getValue('seed'), rand);
     }
 
     public allTreeNodes(node: any){

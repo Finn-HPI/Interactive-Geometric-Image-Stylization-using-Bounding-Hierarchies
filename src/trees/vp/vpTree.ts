@@ -77,7 +77,9 @@ export class VPTree extends Tree{
         if(data.length == 0)
             return null;
 
-        let vp: DataPoint = data.splice(this.randIndex(data), 1)[0];
+        let index = this.randIndex(data);
+        console.log(index);
+        let vp: DataPoint = data.splice(index, 1)[0];
         let node = new VPNode();
         node.point = vp;
 
