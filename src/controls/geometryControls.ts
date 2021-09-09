@@ -9,6 +9,9 @@ export enum ExportMode {
     COLOR, TEXTURE
 }
 
+export enum ExtendMode {
+    NONE, EXTEND
+}
 export class GeometryControls {
 
     protected _controls!: [Controls, Controls, Controls];
@@ -22,7 +25,13 @@ export class GeometryControls {
         ['Texture', ExportMode.TEXTURE]
     ]);
 
+    protected _extendModes: Map<string, ExtendMode> = new Map<string, ExtendMode>([
+        ['None', ExtendMode.NONE],
+        ['Extend', ExtendMode.EXTEND]
+    ]);
+
     protected _exportMode!: ExportMode;
+    protected _extendMode!: ExtendMode;
 
     public constructor(id: string, id2: string, id3: string){
         this._controls = [new Controls(id), new Controls(id2), new Controls(id3)];
@@ -34,6 +43,13 @@ export class GeometryControls {
             buildMode.addEventListener('change', (event) => {
             this._exportMode = this._exportModes.get((event.target as HTMLInputElement).value) as ExportMode;
             Config.updateValue('exportMode', this._exportMode);
+        });
+
+        const extendMode = this._controls[0].createSelectListInput(
+            'Extend Mode', Array.from(this._extendModes.keys()));
+        extendMode.addEventListener('change', (event) => {
+            this._extendMode = this._extendModes.get((event.target as HTMLInputElement).value) as ExtendMode;
+            Config.updateValue('extendMode', this._extendMode);
         });
 
         const buildButton = this._controls[1].createActionButton('Build', 'btn-secondary', ['mb-1']);
@@ -53,6 +69,7 @@ export class GeometryControls {
         })
 
         Config.register('exportMode', buildMode);
+        Config.register('extendMode', extendMode);
     }
 
     public import(event: Event){
@@ -76,7 +93,7 @@ export class GeometryControls {
 
     public build(){
         let canvas = document.getElementById('webgl-canvas') as HTMLCanvasElement;
-        this._glTFBuilder.fromColorGroups(this._svgBuilder.colorGroups, canvas.width, canvas.height, this._renderer.getEncodedRGBImage());
+        this._glTFBuilder.fromColorGroups(this._svgBuilder.colorGroups, canvas.width, canvas.height, this._renderer.getEncodedRGBImage(), this._extendMode == ExtendMode.EXTEND);
         this.changeGltfSource(this._glTFBuilder.encodedUri);
     }
 

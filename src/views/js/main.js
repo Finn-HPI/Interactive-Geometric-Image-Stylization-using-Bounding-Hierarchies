@@ -30,6 +30,8 @@ function render(hashKey) {
     let maskCanvas = document.getElementById('mask-canvas');
     let svgCanvas = document.getElementById('svg-canvas');
     let gltfCanvas = document.getElementById('gltf-canvas');
+    let arcticInCanvas = document.getElementById('arctic-in-canvas');
+    let arcticOutCanvas = document.getElementById('arctic-out-canvas');
     let gltfBackCanvas = document.getElementById('gltf-background-canvas');
 
     pointCanvas.style.display = 'none';
@@ -38,6 +40,8 @@ function render(hashKey) {
     maskCanvas.style.display = 'none';
     svgCanvas.style.display = 'none';
     gltfCanvas.style.display = 'none';
+    arcticInCanvas.style.display = 'none';
+    arcticOutCanvas.style.display = 'none';
     gltfBackCanvas.style.display = 'none';
 
     switch(hashKey){
@@ -83,6 +87,8 @@ function render(hashKey) {
             tabs[6].style.backgroundColor = selected;
             break;
         case '#arctic-core':
+            arcticInCanvas.style.display = 'block';
+            arcticOutCanvas.style.display = 'block';
             pages[7].style.display = 'block';
             tabs[7].style.backgroundColor = selected;
             break;

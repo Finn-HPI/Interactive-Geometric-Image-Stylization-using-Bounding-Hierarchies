@@ -1,15 +1,12 @@
-import { Color } from "paper/dist/paper-core";
 import { SVGBuilder } from "../building/builder/svgBuilder";
 import { Layer } from "../building/layer/layer";
 import { Config } from "../config/config";
-import { setProgress } from "../global/progressbar";
 import { KdTree } from "../trees/kd/kdTree";
 import { QuadTree } from "../trees/quad/quadTree";
 import { VPTree } from "../trees/vp/vpTree";
 import { Controls } from "../utils/htmlUtil";
 import { ImageRenderer } from "../webgl/renderer";
 import { DataStructure } from "./layerControls";
-import * as d3 from "d3";
 
 export enum BorderMode{
     FILL, FILL_AND_BORDER, BORDER, WIREFRAME
@@ -34,7 +31,8 @@ export class VectorControls {
     protected _colorModes: Map<string, ColorMode> = new Map<string, ColorMode>([
         ['Color', ColorMode.COLOR],
         ['Gray Scale', ColorMode.GRAY_SCALE],
-        ['Image', ColorMode.IMAGE]
+        ['Image', ColorMode.IMAGE],
+        ['White', ColorMode.WHITE]
     ]);
 
     public constructor(id: string, id2: string, id3: string){
@@ -115,6 +113,8 @@ export class VectorControls {
     private build(){
         if(Config.layers.size == 0)
             return;
+        
+        this._svgBuilder.encodedImage = this._renderer.getEncodedRGBImage();
         this._svgBuilder.reset();
         Config.layers.forEach((item: [number, HTMLElement, HTMLButtonElement, HTMLButtonElement, HTMLButtonElement], key: Layer) => {
             let tree = this.createTree(key.structure);
@@ -140,7 +140,7 @@ export class VectorControls {
 
     private exportSVG(){
         let link = document.createElement("a");
-        let url = "data:image/svg+xml;utf8," + encodeURIComponent(this._svgBuilder.lastSVG);
+        let url = "data:image/svg+xml;utf8," + encodeURIComponent(Config.lastSvg);
         link.download = 'svg';
         link.href = url;
         link.click();

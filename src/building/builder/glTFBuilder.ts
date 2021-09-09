@@ -121,27 +121,87 @@ export class GlTFBuilder {
             paddingLength,
             this._vertices.length * 4,
             this._colors.length * 4,
+            this._offsets.length * 4,
             this._texCoords.length * 4,
             this._indices.length,
             this._vertices.length / 3,
-            this._colors.length / 3
+            this._colors.length / 3,
+            this._offsets.length / 3
         );
     }
 
-    private async triangulatePath(path: string, pathDepth: number, color: paper.Color){
+    public getCoordinates(point: [number, number], pathDepth: number): [number, number, number]{
+        let pointXY = this.normalizePoint(point[0], point[1], this._width, this._height);
+        let pointZ = pathDepth / 255 - 0.5;
+        return [pointXY[0], pointXY[1], pointZ];
+    }
+
+    private addCoordinateToVertices(point: [number, number, number]){
+        this._vertices.push(point[0]);
+        this._vertices.push(point[1]);
+        this._vertices.push(point[2]);
+    }
+
+    private upadateIndeces(poly: Array<number>, dimensions = 2){
         const earcut = require('earcut');
+        let polyIndices: Array<number> = earcut(poly, null, dimensions);
+        for(let i = 0; i < polyIndices.length - 2; i += 3){
+            this._indices.push(polyIndices[i] + this._lastIndex);
+            this._indices.push(polyIndices[i + 1] + this._lastIndex);
+            this._indices.push(polyIndices[i + 2] + this._lastIndex);
+        }
+        this._lastIndex = this._vertices.length / 3;
+    }
+
+    private extendPathToBack(polygon: Array<[number, number]>, pathDepth: number, color: paper.Color){
+        if(polygon.length < 2) return;
+        for(let i = 0; i < polygon.length -1; i++){
+            let poly = new Array<number>();
+
+            const point1 = this.getCoordinates(polygon[i], pathDepth);
+            const point2 = this.getCoordinates(polygon[i+1], pathDepth);
+            const point3: [number, number, number] = [point1[0], point1[1], -0.5];
+            const point4: [number, number, number] = [point2[0], point2[1], -0.5];
+
+            const points = [point1, point2, point4, point3];
+            points.forEach((point: [number, number, number]) => {
+
+                poly.push(... point);
+                this.addCoordinateToVertices(point);
+
+                this._colors.push(color.red);
+                this._colors.push(color.green);
+                this._colors.push(color.blue);
+
+                this._texCoords.push(polygon[i][0] / this._width);
+                this._texCoords.push(polygon[i][1] / this._height);
+            });
+
+            this._indices.push(1 + this._lastIndex);
+            this._indices.push(0 + this._lastIndex);
+            this._indices.push(3 + this._lastIndex);
+
+            this._indices.push(3 + this._lastIndex);
+            this._indices.push(2 + this._lastIndex);
+            this._indices.push(1 + this._lastIndex);
+
+            this._lastIndex = this._vertices.length / 3;
+        }
+    }
+
+
+    private async triangulatePath(path: string, pathDepth: number, color: paper.Color, extend = false){
         
         let poly = new Array<number>();
         let maxRecursionDepth = Config.getValue('maxRecursionDepth') as number;
 
         let points = svgPathToPolygons(path, maxRecursionDepth, {tolerance:1, decimals:1});
         points[0].forEach((item: [number, number]) => {
-            let point = this.normalizePoint(item[0], item[1], this._width, this._height);
+
+            let point = this.getCoordinates(item, pathDepth);
             poly.push(point[0], point[1]);
-            const depth = pathDepth / 255 - 0.5;
-            this._vertices.push(point[0]);
-            this._vertices.push(point[1]);
-            this._vertices.push(depth);
+
+            this.addCoordinateToVertices(point);
 
             let pathItem = PathItem.create(path);
 
@@ -154,7 +214,7 @@ export class GlTFBuilder {
             
             this._centers.push(center[0]);
             this._centers.push(center[1]);
-            this._centers.push(depth);
+            this._centers.push(point[2]);
             
 
             this._offsets.push(point[0] - center[0]);
@@ -169,16 +229,12 @@ export class GlTFBuilder {
             this._texCoords.push(item[1] / this._height);
         });
 
-        let polyIndices: Array<number> = earcut(poly);
-        for(let i = 0; i < polyIndices.length - 2; i += 3){
-            this._indices.push(polyIndices[i] + this._lastIndex);
-            this._indices.push(polyIndices[i + 1] + this._lastIndex);
-            this._indices.push(polyIndices[i + 2] + this._lastIndex);
-        }
-        this._lastIndex = this._vertices.length / 3;
+        this.upadateIndeces(poly);
+        if(extend)
+            this.extendPathToBack(points[0], pathDepth, color);
     }
 
-    public fromColorGroups(groups: Map<string, Array<string>>, width: number, height: number, encoded_image: string){
+    public fromColorGroups(groups: Map<string, Array<string>>, width: number, height: number, encoded_image: string, extend = false){
         this._encodedImage = encoded_image;
         this._width = width;
         this._height = height;
@@ -201,7 +257,7 @@ export class GlTFBuilder {
 
                 if(color && pathRegex && depthRegex && pathRegex[1].length > 0 && depthRegex.length > 0){
                     depth = Number(depthRegex[1])
-                    this.triangulatePath(pathRegex[1], depth, color);
+                    this.triangulatePath(pathRegex[1], depth, color, extend);
                 }
             });
         });
@@ -213,7 +269,7 @@ export class GlTFBuilder {
     public normalizePoint(x: number, y: number, width: number, height: number){
         let max = Math.max(width, height) / 2;
         let center = [width / 2, height / 2];
-        let point = [x - center[0], y - center[1]];
+        let point: [number, number] = [x - center[0], y - center[1]];
         point = [point[0] / max, -point[1] / max];
         return point;
     }
@@ -255,6 +311,7 @@ export class GlTFBuilder {
         paddingLength: number,
         byteLengthVertices: number,
         byteLengthColors: number,
+        byteLengthOffsets: number,
         byteLengthTexCoords: number
     ){
         let buffers =[
@@ -272,11 +329,11 @@ export class GlTFBuilder {
             },
             {
                 uri: centerUri,
-                byteLength: byteLengthColors
+                byteLength: byteLengthOffsets
             },
             {
                 uri: offsetUri,
-                byteLength: byteLengthColors
+                byteLength: byteLengthOffsets
             }
         ];
         if(Config.getValue('exportMode') == ExportMode.TEXTURE)
@@ -289,7 +346,8 @@ export class GlTFBuilder {
 
     public getBufferViewData(
         byteLengthIndeces: number, byteLengthVertices: number,
-        byteLengthColors: number, byteLengthTexCoords: number
+        byteLengthColors: number, byteLengthOffsets: number,
+        byteLengthTexCoords: number
     ){
         let bufferView = [
             {
@@ -313,13 +371,13 @@ export class GlTFBuilder {
             {
                 buffer: 3,
                 byteOffset: 0,
-                byteLength: byteLengthColors,
+                byteLength: byteLengthOffsets,
                 target: this.ARRAY_BUFFER
             },
             {
                 buffer: 4,
                 byteOffset: 0,
-                byteLength: byteLengthColors,
+                byteLength: byteLengthOffsets,
                 target: this.ARRAY_BUFFER
             }
         ];
@@ -333,7 +391,7 @@ export class GlTFBuilder {
         return bufferView;
     }
 
-    public getAccessorData(indexCount: number, vertexCount: number, colorCount: number){
+    public getAccessorData(indexCount: number, vertexCount: number, colorCount: number, offsetCount: number){
         let accessor = [
             {
                 bufferView: 0,
@@ -366,7 +424,7 @@ export class GlTFBuilder {
                 bufferView: 3,
                 byteOffset: 0,
                 componentType: this.FLOAT,
-                count: colorCount,
+                count: offsetCount,
                 type: 'VEC3',
                 max: [this._minMaxInfo.maxCenterX, this._minMaxInfo.maxCenterY, this._minMaxInfo.maxCenterZ],
                 min: [this._minMaxInfo.minCenterX, this._minMaxInfo.minCenterY, this._minMaxInfo.minCenterZ]
@@ -375,7 +433,7 @@ export class GlTFBuilder {
                 bufferView: 4,
                 byteOffset: 0,
                 componentType: this.FLOAT,
-                count: colorCount,
+                count: offsetCount,
                 type: 'VEC3',
                 max: [this._minMaxInfo.maxOffsetX, this._minMaxInfo.maxOffsetY, this._minMaxInfo.maxOffsetZ],
                 min: [this._minMaxInfo.minOffsetX, this._minMaxInfo.minOffsetY, this._minMaxInfo.minOffsetZ]
@@ -405,10 +463,12 @@ export class GlTFBuilder {
         paddingLength: number,
         byteLengthVertices: number,
         byteLengthColors: number,
+        byteLengthOffsets: number,
         byteLengthTexCoords: number,
         indexCount: number,
         vertexCount: number,
-        colorCount: number
+        colorCount: number,
+        offsetCount: number
     ){
         const gltf = {
             scenes: [ { nodes: [0] } ],
@@ -447,13 +507,15 @@ export class GlTFBuilder {
                 paddingLength,
                 byteLengthVertices,
                 byteLengthColors,
+                byteLengthOffsets,
                 byteLengthTexCoords
             ),
             bufferViews: this.getBufferViewData(
                 byteLengthIndeces, byteLengthVertices, 
-                byteLengthColors, byteLengthTexCoords
+                byteLengthColors, byteLengthOffsets,
+                byteLengthTexCoords
             ),
-            accessors: this.getAccessorData(indexCount, vertexCount, colorCount),
+            accessors: this.getAccessorData(indexCount, vertexCount, colorCount, offsetCount),
             asset: {
                 version: '2.0'
             }

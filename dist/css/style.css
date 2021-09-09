@@ -28,6 +28,19 @@ body {
     border: none;
 }
 
+#arctic-in-canvas {
+    position: absolute;
+    z-index: 2;
+    background-color: #48494a;
+    border: none;
+}
+#arctic-out-canvas {
+    position: absolute;
+    z-index: 3;
+    background-color: #48494a;
+    border: none;
+}
+
 svg {
     position: absolute;
     background-color: #48494a;

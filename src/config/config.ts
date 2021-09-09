@@ -28,18 +28,19 @@ interface ConfigFormat{
 
 export class Config {
 
-    static _applyIgnore = defaultApplyIgnore();
+    static _config: ConfigFormat = {
+        input: new Array<ValueItem>(),
+        layers: new Array<LayerItem>()
+    }
 
+    static _applyIgnore = defaultApplyIgnore();
     static _htmlElements = new Map<string, HTMLInputElement|HTMLSelectElement>();
     static _layerControls: LayerControls;
 
     static _noiseData = new Uint8Array();
     static _needsRefresh = true;
 
-    static _config: ConfigFormat = {
-        input: new Array<ValueItem>(),
-        layers: new Array<LayerItem>()
-    }
+    static _lastSvg = '<svg xmlns="http://www.w3.org/2000/svg"></svg>';
 
     static _nextLayerNum = 0;
     static _layers = new Map<Layer, [number, HTMLElement, HTMLButtonElement, HTMLButtonElement, HTMLButtonElement]>();
@@ -301,6 +302,14 @@ export class Config {
 
     static set layerControls(controls: LayerControls){
         this._layerControls = controls;
+    }
+
+    static get lastSvg(){
+        return this._lastSvg;
+    }
+
+    static set lastSvg(svg: string){
+        this._lastSvg = svg;
     }
 
     static applyIgnore(name: string){

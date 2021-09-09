@@ -29,10 +29,10 @@ export class SVGBuilder{
     protected _pattern!: string;
 
     protected _lastSvg!: string;
+    protected _encodedImage!: string;
 
     constructor(){
         this._colorGroups = new Map<string, Array<string>>();
-        this._lastSvg = '<svg xmlns="http://www.w3.org/2000/svg"></svg>';
     }
 
     public buildFrom(tree: any, width: number, height: number, layer: Layer): void{
@@ -144,12 +144,17 @@ export class SVGBuilder{
         let svg = '<svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 ' + this._width + ' ' + this._height + '">\n';
         let pathData = this.gatherCompletePathData();
         svg += pathData;
-        // svg += '<defs>\n';
-        // svg += '\t<image id="copyImg" x="0" y="0" width="' + this._width + '" height="' + this._height + '" href="'+ this._encoded_original_image + '"/>\n';
-        // svg += this._pattern;
-        // svg += '</defs>\n';
+
+        const colorMode = Config.getValue('colorMode') as number;
+        if(colorMode == ColorMode.IMAGE){
+            svg += '<defs>\n';
+            svg += '\t<image id="copyImg" x="0" y="0" width="' + this._width + '" height="' + this._height + '" href="'+ this._encodedImage + '"/>\n';
+            svg += this._pattern;
+            svg += '</defs>\n';
+        }
+
         svg += '</svg>';
-        this._lastSvg = svg;
+        Config.lastSvg = svg;
         return svg;
     }
 
@@ -401,11 +406,11 @@ export class SVGBuilder{
         return this._colorGroups;
     }
 
-    public get lastSVG(){
-        return this._lastSvg;
-    }
-
     public get tree(){
         return this._tree;
+    }
+
+    public set encodedImage(image: string){
+        this._encodedImage = image;
     }
 }
