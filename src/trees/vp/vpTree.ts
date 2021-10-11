@@ -163,7 +163,7 @@ export class VPTree extends Tree{
         }
     }
 
-    public nodeToSVG(node: VPNode, clip: paper.PathItem, level: number, builder: SVGBuilder): paper.PathItem | null {
+    public nodeToShape(node: VPNode, clip: paper.PathItem, level: number, builder: SVGBuilder): paper.PathItem | null {
         if(node == null || !node.point) 
             return null;
 
@@ -174,26 +174,27 @@ export class VPTree extends Tree{
         
         node.level = level;
 
-        let intersect = clip.intersect(
+        let inside = clip.intersect(
             new Path.Circle(new Point(node.point.x, node.point.y), node.threshold)
         );
 
-        let inside = intersect;
-        let outside = clip.subtract(intersect);
-        intersect.fillColor = node.color;
+        let outside = clip.subtract(inside);
+        inside.fillColor = node.color;
 
-        node.path = intersect;
+        node.path = inside;
 
         let l: paper.PathItem | null = null;
         let r: paper.PathItem | null = null;
 
+        
+
         if(node.left != null && node.left.lod / 255 > level / builder.maxLevel)
-            l = this.nodeToSVG(node.left, inside, level + 1, builder);
+            l = this.nodeToShape(node.left, inside, level + 1, builder);
         if(node.right != null && node.right.lod / 255 > level / builder.maxLevel)
-            r = this.nodeToSVG(node.right, outside, level + 1, builder);
+            r = this.nodeToShape(node.right, outside, level + 1, builder);
 
         if(l == null && r == null)
-            return intersect;
+            return inside;
 
         let path: paper.PathItem | null = null;
         if(l !== null && r !== null)
@@ -207,24 +208,6 @@ export class VPTree extends Tree{
             node.path = node.path.subtract(path);
         }
         return (path && node.path)? path.unite(node.path) : null;
-    }
-
-    public removeDetail(){
-        removeCheckNodePath(this._root as VPNode, this);
-
-        function removeCheckNodePath(node: VPNode, tree: VPTree){
-            if(node && node.path){
-                if(node.left && node.left.path && node.left.color === node.color){
-                    node.path = node.path.unite(node.left.path);
-                    tree.resetChilds(node);
-                    return;
-                }
-                if(node.left)
-                    removeCheckNodePath(node.left, tree);
-                if(node.right)
-                    removeCheckNodePath(node.right, tree);
-            }
-        }
     }
 
     public applyFuncOnChilds(node: VPNode, func: (node: VPNode) => void){

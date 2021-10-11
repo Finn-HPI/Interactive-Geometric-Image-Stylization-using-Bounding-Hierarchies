@@ -1,4 +1,4 @@
-import { Color, CompoundPath, Path, PathItem, Point } from "paper/dist/paper-core";
+import { Path, Point } from "paper/dist/paper-core";
 import { Config } from "../../config/config";
 import { ColorMode, Criteria, DataStructure } from "../../controls/layerControls";
 import { DataPoint } from "../../trees/dataPoint";

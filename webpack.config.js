@@ -12,6 +12,10 @@ module.exports = {
     module: {
         rules: [
             {
+                test: /\.worker\.(c|m)?js$/i,
+                use: { loader: "worker-loader" }
+            },
+            {
                 test: /\.ts$/,
                 use: 'ts-loader',
                 include: [path.resolve(__dirname, 'src')]

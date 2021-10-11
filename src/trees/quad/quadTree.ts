@@ -109,7 +109,7 @@ export class QuadTree extends Tree{
             this.traverse(node.bottomRightChild, nodes);
     }
 
-    public nodeToSVG(node: QuadNode, level: number, builder: SVGBuilder){
+    public nodeToShape(node: QuadNode, level: number, builder: SVGBuilder){
         if(node == null)
             return;
 
@@ -120,19 +120,19 @@ export class QuadTree extends Tree{
 
         let tl = false, tr = false, bl = false, br = false;
         if(node.topLeftChild != null && level * 255 / builder.maxLevel < node.topLeftChild.lod)
-            this.nodeToSVG(node.topLeftChild, level + 1, builder);
+            this.nodeToShape(node.topLeftChild, level + 1, builder);
         else
             tl = true;
         if(node.topRightChild != null && level * 255 / builder.maxLevel < node.topRightChild.lod)
-            this.nodeToSVG(node.topRightChild, level + 1, builder);
+            this.nodeToShape(node.topRightChild, level + 1, builder);
         else
             tr = true;
         if(node.bottomLeftChild != null && level * 255 / builder.maxLevel < node.bottomLeftChild.lod)
-            this.nodeToSVG(node.bottomLeftChild, level + 1, builder);
+            this.nodeToShape(node.bottomLeftChild, level + 1, builder);
         else
             bl = true;
         if(node.bottomRightChild != null && level * 255 / builder.maxLevel < node.bottomRightChild.lod)
-            this.nodeToSVG(node.bottomRightChild, level + 1, builder);
+            this.nodeToShape(node.bottomRightChild, level + 1, builder);
         else 
             br = true;
 
@@ -158,7 +158,6 @@ export class QuadTree extends Tree{
             node.bottomRightChild.path = null;
         }
         if(tl || tr || bl || br){
-
             let rectangle = new Rectangle(
                 new Point(node.topLeft.x, node.topLeft.y),
                 new Point(node.bottomRight.x, node.bottomRight.y)

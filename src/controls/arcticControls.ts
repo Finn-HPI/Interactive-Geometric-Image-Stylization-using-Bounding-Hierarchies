@@ -42,14 +42,14 @@ export class ArcticControls{
     }
 
     public setup(){
-        const svg2imgButton = this._controls[0].createActionButton('Convert SVG To Image', 'btn-primary', ['mb-1']);
+        const svg2imgButton = this._controls[0].createActionButton('Convert SVG To Image', 'btn-primary', ['mb-1', 'disabled']);
         svg2imgButton.addEventListener('click', () => {
-            this.convertSvg2Img();
+            // this.convertSvg2Img();
         });
 
-        const showButton = this._controls[0].createActionButton('Show Image', 'btn-secondary');
+        const showButton = this._controls[0].createActionButton('Show Image', 'btn-secondary', ['disabled']);
         showButton.addEventListener('click', () => {
-            this.showImage();
+            // this.showImage();
         });
 
         const effectControl = this._controls[1].createSelectListInput(
@@ -60,9 +60,9 @@ export class ArcticControls{
             this._currentEffect = value;
         });
 
-        const applyButton = this._controls[2].createActionButton('Apply', 'btn-warning');
+        const applyButton = this._controls[2].createActionButton('Apply', 'btn-warning', ['disabled']);
         applyButton.addEventListener('click', () => {
-            this.apply();
+            // this.apply();
         });
 
         this._outputCanvas = document.getElementById('arctic-out-canvas') as HTMLCanvasElement;
@@ -100,6 +100,9 @@ export class ArcticControls{
     
 
     private async initProcessorAndClient(){
+
+        //TODO: get Webworker running on webpack 4
+
         // this._processor = new WebProcessor({
         //     canvas: this._outputCanvas,
         //     corePath: '/arctic-core/index.js',

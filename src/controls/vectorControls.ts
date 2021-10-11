@@ -116,6 +116,7 @@ export class VectorControls {
         
         this._svgBuilder.encodedImage = this._renderer.getEncodedRGBImage();
         this._svgBuilder.reset();
+
         Config.layers.forEach((item: [number, HTMLElement, HTMLButtonElement, HTMLButtonElement, HTMLButtonElement], key: Layer) => {
             let tree = this.createTree(key.structure);
             tree.clipPath = key.clipPath;
@@ -124,14 +125,12 @@ export class VectorControls {
                 this._renderer.canvasSize[0], this._renderer.canvasSize[1],
                 key.colorMode
             );
-            console.log(tree);
             this._svgBuilder.buildFrom(
                 tree,
                 this._renderer.canvasSize[0], this._renderer.canvasSize[1],
                 key
             );
             this._svgBuilder.treeToSvg();
-
         });
         this._svgBuilder.applyAppearanceSettings();
         this._svgBuilder.display();
@@ -141,7 +140,7 @@ export class VectorControls {
     private exportSVG(){
         let link = document.createElement("a");
         let url = "data:image/svg+xml;utf8," + encodeURIComponent(Config.lastSvg);
-        link.download = 'svg';
+        link.download = 'igis';
         link.href = url;
         link.click();
     }

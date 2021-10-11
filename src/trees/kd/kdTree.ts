@@ -156,7 +156,7 @@ export class KdTree extends Tree{
             this.traverse(node.right, nodes);
     }
 
-    public nodeToSVG(node: KdNode, area: paper.Rectangle, level: number, builder: SVGBuilder){
+    public nodeToShape(node: KdNode, area: paper.Rectangle, level: number, builder: SVGBuilder){
         if(node == null || node.point == null)
             return;
 
@@ -171,11 +171,11 @@ export class KdTree extends Tree{
         let l = false, r = false;
         let rect;
         if(node.left != null && level * 255 / builder.maxLevel < node.left.lod)
-            this.nodeToSVG(node.left, left, level + 1, builder);
+            this.nodeToShape(node.left, left, level + 1, builder);
         else
             l = true;
         if(node.right != null && level * 255 / builder.maxLevel < node.right.lod)
-            this.nodeToSVG(node.right, right,level + 1, builder);
+            this.nodeToShape(node.right, right,level + 1, builder);
         else    
             r = true;
 

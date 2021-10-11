@@ -60,7 +60,9 @@ export class ImageRenderer extends Renderer {
                 this._rawImage = img;
                 this._rawImage.flip(false, true);
                 this.resizeTexture(type);
+
                 console.log(path);
+
                 resolve(type);
             });
         });
@@ -102,27 +104,14 @@ export class ImageRenderer extends Renderer {
             this.loadTexture('img/saliency/attention/' + file, TextureType.SaliencyA).then((res) => {
             this.loadTexture('img/saliency/objectness/' + file, TextureType.SaliencyO).then((res) => {
             this.loadTexture('img/segmentation/deeplab1/' + file, TextureType.Segmentation).then((res) => {
-
                 this._mode = Mode.NORMAL;
                 this.updateChange();
                 this._renderPass.layerMode = this._layerMode;
                 setProgress(0);
                 this._loaded = true;
                 resolve('all loaded');
-
-            });
-            });
-            });
-            });
-            });
-            });
-            });
+            });});});});});});});
         });
-        // this.loadTexture('img/matting/modnetcamera/' + file, TextureType.Matting);
-        // this.loadTexture('img/normal/' + file, TextureType.Normal);
-        // this.loadTexture('img/saliency/attention/' + file, TextureType.SaliencyA);
-        // this.loadTexture('img/saliency/objectness/' + file, TextureType.SaliencyO);
-        // this.loadTexture('img/segmentation/deeplab1/' + file, TextureType.Segmentation);
     }
 
     protected onInitialize(context: Context): boolean {

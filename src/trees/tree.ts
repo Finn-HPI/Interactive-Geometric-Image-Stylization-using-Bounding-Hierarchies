@@ -1,7 +1,6 @@
 import { Color } from "paper/dist/paper-core";
 import { Config } from "../config/config";
 import { findMedianColor } from "../utils/colorUtil";
-import { ImageRenderer } from "../webgl/renderer";
 import { DataPoint } from "./dataPoint";
 
 export enum ColorMode {
@@ -22,7 +21,6 @@ export abstract class Tree {
     public setupRand(){
         let rand = require('random-seed').create(Config.getValue('seed'));
         this._random = () => {return rand.floatBetween(0, 1)};
-        console.log(Config.getValue('seed'), rand);
     }
 
     public allTreeNodes(node: any){
@@ -48,7 +46,6 @@ export abstract class Tree {
             case ColorMode.POINT:
                 if(node.point)
                     return node.point.color;
-                //fallthrough if node.point == null
             case ColorMode.AVG:
                 let color = new Color(0,0,0);
                 let amount = 0;

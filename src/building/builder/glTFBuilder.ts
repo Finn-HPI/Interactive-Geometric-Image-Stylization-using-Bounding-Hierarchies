@@ -1,7 +1,6 @@
 import { PathItem } from "paper/dist/paper-core";
 import { Config } from "../../config/config";
 import { ExportMode } from "../../controls/geometryControls";
-import { TreeNode } from "../../trees/node";
 import { bytesToBase64 } from "../../utils/base64";
 import { getColorFromHex } from "../../utils/colorUtil";
 import { svgPathToPolygons } from "../../utils/svgUtils";
@@ -21,6 +20,7 @@ export class GlTFBuilder {
 
     protected _lastIndex = 0;
     protected _vertices!: Array<number>;
+    protected _normals!: Array<number>;
     protected _indices!: Array<number>;
     protected _colors!: Array<number>;
     protected _texCoords!: Array<number>;
@@ -46,7 +46,10 @@ export class GlTFBuilder {
         minCenterZ: number, maxCenterZ: number,
         minOffsetX: number, maxOffsetX: number,
         minOffsetY: number, maxOffsetY: number,
-        minOffsetZ: number, maxOffsetZ: number
+        minOffsetZ: number, maxOffsetZ: number,
+        minNormalX: number, maxNormalX: number,
+        minNormalY: number, maxNormalY: number,
+        minNormalZ: number, maxNormalZ: number
     };
 
     public constructor(){
@@ -56,6 +59,8 @@ export class GlTFBuilder {
     private cleanSetup(){
         this._lastIndex = 0;
         this._vertices = new Array<number>();
+        this._normals = new Array<number>();
+        
         this._indices = new Array<number>();
         this._colors = new Array<number>();
         this._texCoords = new Array<number>();
@@ -79,7 +84,10 @@ export class GlTFBuilder {
             minCenterZ: 0, maxCenterZ: 0,
             minOffsetX: 0, maxOffsetX: 0,
             minOffsetY: 0, maxOffsetY: 0,
-            minOffsetZ: 0, maxOffsetZ: 0
+            minOffsetZ: 0, maxOffsetZ: 0,
+            minNormalX: 0, maxNormalX: 0,
+            minNormalY: 0, maxNormalY: 0,
+            minNormalZ: 0, maxNormalZ: 0,
         };
     }
 
@@ -91,6 +99,7 @@ export class GlTFBuilder {
             indices2[i] = this._indices[i];
 
         let vertices2 = new Float32Array(this._vertices);
+        let normals2 = new Float32Array(this._normals);
         let colors2 = new Float32Array(this._colors);
         let texCoords2 = new Float32Array(this._texCoords);
         let centers2 = new Float32Array(this._centers);
@@ -98,6 +107,7 @@ export class GlTFBuilder {
 
         let i = new Uint8Array(indices2.buffer);
         let v = new Uint8Array(vertices2.buffer);
+        let n = new Uint8Array(normals2.buffer);
         let c = new Uint8Array(colors2.buffer);
         let t = new Uint8Array(texCoords2.buffer);
         let center = new Uint8Array(centers2.buffer);
@@ -105,6 +115,7 @@ export class GlTFBuilder {
 
         let indexUri = "data:application/gltf-buffer;base64," + bytesToBase64(i);
         let vertexUri = "data:application/gltf-buffer;base64," + bytesToBase64(v);
+        let normalUri = "data:application/gltf-buffer;base64," + bytesToBase64(n);
         let colorUri = "data:application/gltf-buffer;base64," + bytesToBase64(c);
         let texCoordUri = "data:application/gltf-buffer;base64," + bytesToBase64(t);
         let centerUri = "data:application/gltf-buffer;base64," + bytesToBase64(center);
@@ -113,6 +124,7 @@ export class GlTFBuilder {
         this.exportGlTF(
             indexUri,
             vertexUri,
+            normalUri,
             colorUri,
             texCoordUri,
             centerUri,
@@ -136,10 +148,9 @@ export class GlTFBuilder {
         return [pointXY[0], pointXY[1], pointZ];
     }
 
-    private addCoordinateToVertices(point: [number, number, number]){
-        this._vertices.push(point[0]);
-        this._vertices.push(point[1]);
-        this._vertices.push(point[2]);
+    private addCoordinateToVerticesAndNormals(point: [number, number, number], normal: [number, number, number]){
+        this._vertices.push(... point);
+        this._normals.push(... normal);
     }
 
     private upadateIndeces(poly: Array<number>, dimensions = 2){
@@ -151,6 +162,22 @@ export class GlTFBuilder {
             this._indices.push(polyIndices[i + 2] + this._lastIndex);
         }
         this._lastIndex = this._vertices.length / 3;
+    }
+
+    private cross(a: [number, number, number], b: [number, number, number]): [number, number, number]{
+       return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+    }
+
+    private minus(a: [number, number, number], b: [number, number, number]): [number, number ,number]{
+        return [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+    }
+
+    private multiply(a: [number, number, number], f: number): [number, number, number]{
+        return [a[0] * f, a[1] * f, a[2] * f];
+    }
+
+    private magnitude(a: [number, number, number]){
+        return Math.sqrt(a[0] * a[0] + a[1] * a[1] + a[2] * a[2]);
     }
 
     private extendPathToBack(polygon: Array<[number, number]>, pathDepth: number, color: paper.Color){
@@ -167,7 +194,12 @@ export class GlTFBuilder {
             points.forEach((point: [number, number, number]) => {
 
                 poly.push(... point);
-                this.addCoordinateToVertices(point);
+
+                let normal = this.multiply(this.cross(this.minus(point1, point2), this.minus(point4, point2)), -1);
+                const mag = this.magnitude(normal);
+                normal = this.multiply(normal, 1/mag);
+
+                this.addCoordinateToVerticesAndNormals(point, normal);
 
                 this._colors.push(color.red);
                 this._colors.push(color.green);
@@ -201,8 +233,7 @@ export class GlTFBuilder {
             let point = this.getCoordinates(item, pathDepth);
             poly.push(point[0], point[1]);
 
-            this.addCoordinateToVertices(point);
-
+            this.addCoordinateToVerticesAndNormals(point, [0, 0, 1]);
             let pathItem = PathItem.create(path);
 
             let center = this.normalizePoint(
@@ -228,10 +259,28 @@ export class GlTFBuilder {
             this._texCoords.push(item[0] / this._width);
             this._texCoords.push(item[1] / this._height);
         });
-
         this.upadateIndeces(poly);
-        if(extend)
+
+        if(extend){
+            let polyBack = new Array<number>();
+            points[0].forEach((item: [number, number]) => {
+                let point = this.getCoordinates(item, 0);
+
+                polyBack.push(point[0], point[1]);
+                this.addCoordinateToVerticesAndNormals(point, [0, 0, -1]);
+               
+                this._colors.push(color.red);
+                this._colors.push(color.green);
+                this._colors.push(color.blue);
+
+                this._texCoords.push(item[0] / this._width);
+                this._texCoords.push(item[1] / this._height);
+            });
+            if(polyBack.length > 0)
+                this.upadateIndeces(polyBack);
+
             this.extendPathToBack(points[0], pathDepth, color);
+        }
     }
 
     public fromColorGroups(groups: Map<string, Array<string>>, width: number, height: number, encoded_image: string, extend = false){
@@ -281,7 +330,8 @@ export class GlTFBuilder {
                     primitives: [{
                         attributes: {
                             POSITION: 1,
-                            TEXCOORD_0: 2
+                            TEXCOORD_0: 2,
+                            NORMAL: 5        
                         },
                         indices: 0,
                         material: 0
@@ -292,7 +342,8 @@ export class GlTFBuilder {
                     primitives: [{
                         attributes: {
                             POSITION: 1,
-                            COLOR_0: 2
+                            COLOR_0: 2,
+                            NORMAL: 5
                         },
                         indices: 0,
                     }]
@@ -303,6 +354,7 @@ export class GlTFBuilder {
     private getBufferData(
         indexUri: string, 
         vertexUri: string,
+        normalUri: string,
         colorUri: string,
         texCoordUri: string,
         centerUri: string,
@@ -334,6 +386,10 @@ export class GlTFBuilder {
             {
                 uri: offsetUri,
                 byteLength: byteLengthOffsets
+            },
+            {
+                uri: normalUri,
+                byteLength: byteLengthVertices
             }
         ];
         if(Config.getValue('exportMode') == ExportMode.TEXTURE)
@@ -378,6 +434,12 @@ export class GlTFBuilder {
                 buffer: 4,
                 byteOffset: 0,
                 byteLength: byteLengthOffsets,
+                target: this.ARRAY_BUFFER
+            },
+            {
+                buffer: 5,
+                byteOffset: 0,
+                byteLength: byteLengthVertices,
                 target: this.ARRAY_BUFFER
             }
         ];
@@ -437,6 +499,15 @@ export class GlTFBuilder {
                 type: 'VEC3',
                 max: [this._minMaxInfo.maxOffsetX, this._minMaxInfo.maxOffsetY, this._minMaxInfo.maxOffsetZ],
                 min: [this._minMaxInfo.minOffsetX, this._minMaxInfo.minOffsetY, this._minMaxInfo.minOffsetZ]
+            },
+            {
+                bufferView: 5,
+                byteOffset: 0,
+                componentType: this.FLOAT,
+                count: vertexCount,
+                type: 'VEC3',
+                max: [this._minMaxInfo.maxNormalX, this._minMaxInfo.maxNormalY, this._minMaxInfo.maxNormalZ],
+                min: [this._minMaxInfo.minNormalX, this._minMaxInfo.minNormalY, this._minMaxInfo.minNormalZ]
             }
         ];
         if(Config.getValue('exportMode') == ExportMode.TEXTURE)
@@ -455,6 +526,7 @@ export class GlTFBuilder {
     public exportGlTF(
         indexUri: string, 
         vertexUri: string,
+        normalUri: string,
         colorUri: string,
         texCoordUri: string,
         centerUri: string,
@@ -499,6 +571,7 @@ export class GlTFBuilder {
             buffers: this.getBufferData(
                 indexUri, 
                 vertexUri,
+                normalUri,
                 colorUri,
                 texCoordUri,
                 centerUri,
@@ -569,6 +642,15 @@ export class GlTFBuilder {
         this._minMaxInfo.minOffsetZ = this._offsets[2];
         this._minMaxInfo.maxOffsetZ = this._offsets[2];
 
+        this._minMaxInfo.minNormalX = this._normals[0];
+        this._minMaxInfo.maxNormalX = this._normals[0];
+
+        this._minMaxInfo.minNormalY = this._normals[1];
+        this._minMaxInfo.maxNormalY = this._normals[1];
+
+        this._minMaxInfo.minNormalZ = this._normals[2];
+        this._minMaxInfo.maxNormalZ = this._normals[2];
+
         this._indices.forEach((index: number) => {
             if(index < this._minMaxInfo.minIndex)
                 this._minMaxInfo.minIndex = index;
@@ -605,15 +687,35 @@ export class GlTFBuilder {
             if(this._colors[i+2] > this._minMaxInfo.maxBlue)
                 this._minMaxInfo. maxBlue = this._colors[i+2];
 
+            if(this._normals[i] < this._minMaxInfo.minNormalX)
+                this._minMaxInfo.minNormalX = this._normals[i];
+            if(this._normals[i+1] < this._minMaxInfo.minNormalY)
+                this._minMaxInfo.minNormalY = this._normals[i+1];
+            if(this._normals[i+2] < this._minMaxInfo.minNormalZ)
+                this._minMaxInfo.minNormalZ = this._normals[i+2];
+
+            if(this._normals[i] > this._minMaxInfo.maxNormalX)
+                this._minMaxInfo.maxNormalX = this._normals[i];
+            if(this._normals[i+1] > this._minMaxInfo.maxNormalY)
+                this._minMaxInfo.maxNormalY = this._normals[i+1];
+            if(this._normals[i+2] > this._minMaxInfo.maxNormalZ)
+                this._minMaxInfo.maxNormalZ = this._normals[i+2];
+        }
+
+        for(let i = 0; i < this._offsets.length - 2; i +=3){
             if(this._centers[i] < this._minMaxInfo.minCenterX)
                 this._minMaxInfo.minCenterX = this._centers[i];
             if(this._centers[i+1] < this._minMaxInfo.minCenterY)
                 this._minMaxInfo.minCenterY = this._centers[i+1];
+            if(this._centers[i+2] < this._minMaxInfo.minCenterZ)
+                this._minMaxInfo.minCenterZ = this._centers[i+2];
 
             if(this._centers[i] > this._minMaxInfo.maxCenterX)
                 this._minMaxInfo.maxCenterX = this._centers[i];
             if(this._centers[i+1] > this._minMaxInfo.maxCenterY)
                 this._minMaxInfo.maxCenterY = this._centers[i+1];
+            if(this._centers[i+2] > this._minMaxInfo.maxCenterZ)
+                this._minMaxInfo.maxCenterZ = this._centers[i+2];
 
             if(this._offsets[i] < this._minMaxInfo.minOffsetX)
                 this._minMaxInfo.minOffsetX = this._offsets[i];
@@ -629,9 +731,6 @@ export class GlTFBuilder {
             if(this._offsets[i+2] > this._minMaxInfo.maxOffsetZ)
                 this._minMaxInfo.maxOffsetZ = this._offsets[i+2];
         }
-
-        this._minMaxInfo.minCenterZ = this._minMaxInfo.minZ;
-        this._minMaxInfo.maxCenterZ = this._minMaxInfo.maxZ;
 
         for(let i = 0; i < this._texCoords.length; i += 2){
             if(this._texCoords[i] < this._minMaxInfo.minUVX)

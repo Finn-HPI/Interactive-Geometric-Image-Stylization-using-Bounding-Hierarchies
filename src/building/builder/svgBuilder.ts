@@ -63,13 +63,13 @@ export class SVGBuilder{
         let tree;
         switch(this._tree.constructor){
             case VPTree: tree = this._tree as VPTree;
-                tree.nodeToSVG(tree.root as VPNode, this._background, 0, this);
+                tree.nodeToShape(tree.root as VPNode, this._background, 0, this);
                 break;
             case QuadTree: tree = this._tree as QuadTree;
-                tree.nodeToSVG(tree.root as QuadNode, 0, this);
+                tree.nodeToShape(tree.root as QuadNode, 0, this);
                 break;
             case KdTree: tree = this._tree as KdTree;
-                tree.nodeToSVG(tree.root as KdNode, new Rectangle(new Point(0,0), new Point(this._width, this._height)), 0, this);
+                tree.nodeToShape(tree.root as KdNode, new Rectangle(new Point(0,0), new Point(this._width, this._height)), 0, this);
         }
         console.log('finished building');
     }
@@ -81,8 +81,6 @@ export class SVGBuilder{
     public treeToSvg(){
         if(!this._tree || this._tree.root == null || !this._layer) 
             return;
-
-        console.log('start clipping');
         const clipPath = this._layer.generateClipPath(this._width, this._height)[0];
 
         this._tree.allTreeNodes(this._tree.root).forEach((each: any) => {
@@ -99,7 +97,6 @@ export class SVGBuilder{
                     this.exportToSvg(each.path, each, false);
             }
         });
-        console.log('clipping finished');
     }
 
     public exportToSvg(item: any, node: any, child: boolean){
@@ -190,7 +187,6 @@ export class SVGBuilder{
         color0: string,
         color1: string
     }){
-
         let border0 = options? options.border0 : Config.getValue('border0') as number;
         let border1 = options? options.border1 : Config.getValue('border1') as number;
         let borderMode = options? options.borderMode : Config.getValue('borderMode') as number;
@@ -208,7 +204,6 @@ export class SVGBuilder{
                 let idRegex = part.match(/id="([^"]*)"/);
 
                 if(strokeRegex && strokeRegex.length >= 3 && levelRegex && levelRegex.length >= 4){
-
                     let stroke = strokeRegex[1];
                     let strokeWidth = strokeRegex[2];
                     let level = Number(levelRegex[1]);
@@ -227,6 +222,7 @@ export class SVGBuilder{
 
                     if(colorRegex && colorRegex.length >= 2){
                         if(borderMode == BorderMode.FILL || borderMode == BorderMode.FILL_AND_BORDER){
+
                             if(colorMode == ColorMode.GRAY_SCALE && originalColorRegex){
                                 let newColor = colorToHex(colorToGrayScale(getColorFromHex(originalColorRegex[1])));
                                 parts[i] = parts[i].replace(colorRegex[1], newColor);
@@ -239,6 +235,7 @@ export class SVGBuilder{
                             else{
                                 parts[i] = parts[i].replace(' ' + colorRegex[0], '');
                             }
+
                         }else{
                             parts[i] = parts[i].replace(colorRegex[0], 'fill="none"');
                         }
@@ -329,8 +326,7 @@ export class SVGBuilder{
                 let idRegex = each.match(/id="([^"]*)"/);
                 let pathRegex = each.match(/d="([^"]*)"/);
                 if(pathRegex && idRegex){
-                    let path = PathItem.create(pathRegex[1]);
-                    
+                    let path = PathItem.create(pathRegex[1]);                    
                     let poly = svgPathToPolygons(pathRegex[1], maxRecursionDepth , {tolerance:1, decimals:1});
 
                     if(path.area > 5){

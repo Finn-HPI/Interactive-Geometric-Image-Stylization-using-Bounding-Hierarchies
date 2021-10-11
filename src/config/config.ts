@@ -2,7 +2,7 @@ import { Layer } from "../building/layer/layer";
 import { defaultApplyIgnore, defaultValues } from "./default";
 import { LayerControls } from "../controls/layerControls";
 import { colorModeToString, criteriaToString, dataStructureToString, stringToColorMode, stringToCriteria, stringToDataStructure } from "../utils/conversionUtil";
-import { Path, PathItem } from "paper/dist/paper-core";
+import { Path } from "paper/dist/paper-core";
 
 export interface ValueItem {
     name: string,
